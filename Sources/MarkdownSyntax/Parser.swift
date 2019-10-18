@@ -88,8 +88,16 @@ public class Parser {
 
             for node in nodes {
                 switch node.type {
+                case .heading:
+                    let children = try parsePhrasingContent(node.children)
+                    let depth = Heading.Depth(rawValue: Int(node.headingLevel)) ?? .h6
+                    items.append(Heading(children: children, depth: depth, position: node.position))
+
                 case .paragraph:
                     items.append(Paragraph(children: try parsePhrasingContent(node.children), position: node.position))
+
+                case .blockQuote:
+                    items.append(Blockquote(children: try parseBlockContent(node.children), position: node.position))
 
                 default:
                     break
@@ -103,7 +111,7 @@ public class Parser {
 
             for node in nodes {
                 switch node.type {
-                case .paragraph:
+                case .paragraph, .heading, .blockQuote:
                     items.append(contentsOf: try parseBlockContent([node]))
 
                 case .footnoteDefinition:

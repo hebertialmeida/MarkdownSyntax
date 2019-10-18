@@ -1,7 +1,7 @@
 import XCTest
 @testable import MarkdownSyntax
 
-final class MarkdownSyntaxTests: XCTestCase {
+final class ParserInlineTests: XCTestCase {
 
     func testLink() throws {
         // given
@@ -193,7 +193,7 @@ final class MarkdownSyntaxTests: XCTestCase {
         XCTAssertNotNil(paragraph.children[2] as? Text)
     }
 
-    func testFootnote() throws {
+    func testFootnoteReference() throws {
         // given
         let input =
         """
@@ -210,14 +210,11 @@ final class MarkdownSyntaxTests: XCTestCase {
         let node2 = paragraph.children[3] as! FootnoteReference
 
         // then
-        XCTAssertNotNil(tree)
         XCTAssertEqual(node.type, .footnoteReference)
         XCTAssertEqual(node2.type, .footnoteReference)
         XCTAssertEqual(node.identifier, "1")
         XCTAssertEqual(node.label, "1")
         XCTAssertEqual(node2.identifier, "2")
         XCTAssertEqual(node2.label, "2")
-//        XCTAssertEqual(node2.identifier, "longnote")
-//        XCTAssertEqual(node2.label, "longnote")
     }
 }
