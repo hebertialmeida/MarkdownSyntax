@@ -97,4 +97,131 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(text.value, "Alpha bravo charlie.")
         XCTAssertEqual(text2.value, "This is the second line.")
     }
+
+    func testThematicBreak() throws {
+        // given
+        let input =
+        """
+        Alpha bravo charlie.
+        * * *
+        This is the second line.
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let thematicBreak = tree.children[1] as! ThematicBreak
+
+        // then
+        XCTAssertEqual(thematicBreak.type, .thematicBreak)
+    }
+
+    func testCode() throws {
+        // given
+        let input =
+        """
+        ```swift
+        func some() {
+            print("code")
+        }
+        ```
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let code = tree.children.first as! Code
+
+        // then
+        XCTAssertEqual(code.type, .code)
+        XCTAssertEqual(code.language, "swift")
+        XCTAssertEqual(code.meta, nil)
+        XCTAssertEqual(code.value, "func some() {\n    print(\"code\")\n}\n")
+    }
+
+    func testHTML() throws {
+        // given
+        let input =
+        """
+        <div id="foo"
+          class="bar">
+        </div>
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let code = tree.children.first as! HTML
+
+        // then
+        XCTAssertEqual(code.type, .html)
+        XCTAssertEqual(code.value, "<div id=\"foo\"\n  class=\"bar\">\n</div>\n")
+    }
+
+    func testList() throws {
+        // given
+        let input =
+        """
+        - First
+        - Second
+        - Third
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let list = tree.children.first as! List
+        let first = list.children[0] as! ListItem
+        let second = list.children[1] as! ListItem
+        let third = list.children[2] as! ListItem
+        let text = (first.children.first as! Paragraph).children.first as! Text
+        let text2 = (second.children.first as! Paragraph).children.first as! Text
+        let text3 = (third.children.first as! Paragraph).children.first as! Text
+
+        // then
+        XCTAssertEqual(list.type, .list)
+        XCTAssertEqual(first.checked, nil)
+        XCTAssertEqual(first.spread, false)
+        XCTAssertEqual(text.value, "First")
+
+        XCTAssertEqual(second.checked, nil)
+        XCTAssertEqual(second.spread, false)
+        XCTAssertEqual(text2.value, "Second")
+
+        XCTAssertEqual(third.checked, nil)
+        XCTAssertEqual(third.spread, false)
+        XCTAssertEqual(text3.value, "Third")
+    }
+
+    func testListSpread() throws {
+            // given
+            let input =
+            """
+            - First
+
+            - Second
+
+            - Third
+            """
+
+            // when
+            let tree = try Parser().parse(text: input)
+            let list = tree.children.first as! List
+            let first = list.children[0] as! ListItem
+            let second = list.children[1] as! ListItem
+            let third = list.children[2] as! ListItem
+            let text = (first.children.first as! Paragraph).children.first as! Text
+            let text2 = (second.children.first as! Paragraph).children.first as! Text
+            let text3 = (third.children.first as! Paragraph).children.first as! Text
+
+            // then
+            XCTAssertEqual(list.type, .list)
+            XCTAssertEqual(first.checked, nil)
+            XCTAssertEqual(first.spread, true)
+            XCTAssertEqual(text.value, "First")
+
+            XCTAssertEqual(second.checked, nil)
+            XCTAssertEqual(second.spread, true)
+            XCTAssertEqual(text2.value, "Second")
+
+            XCTAssertEqual(third.checked, nil)
+            XCTAssertEqual(third.spread, true)
+            XCTAssertEqual(text3.value, "Third")
+        }
 }
