@@ -176,6 +176,48 @@ final class ParserBlockTests: XCTestCase {
 
         // then
         XCTAssertEqual(list.type, .list)
+        XCTAssertEqual(list.ordered, false)
+        XCTAssertEqual(list.start, nil)
+        XCTAssertEqual(list.spread, false)
+
+        XCTAssertEqual(first.checked, nil)
+        XCTAssertEqual(first.spread, false)
+        XCTAssertEqual(text.value, "First")
+
+        XCTAssertEqual(second.checked, nil)
+        XCTAssertEqual(second.spread, false)
+        XCTAssertEqual(text2.value, "Second")
+
+        XCTAssertEqual(third.checked, nil)
+        XCTAssertEqual(third.spread, false)
+        XCTAssertEqual(text3.value, "Third")
+    }
+
+    func testListOrdered() throws {
+        // given
+        let input =
+        """
+        1. First
+        2. Second
+        3. Third
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let list = tree.children.first as! List
+        let first = list.children[0] as! ListItem
+        let second = list.children[1] as! ListItem
+        let third = list.children[2] as! ListItem
+        let text = (first.children.first as! Paragraph).children.first as! Text
+        let text2 = (second.children.first as! Paragraph).children.first as! Text
+        let text3 = (third.children.first as! Paragraph).children.first as! Text
+
+        // then
+        XCTAssertEqual(list.type, .list)
+        XCTAssertEqual(list.ordered, true)
+        XCTAssertEqual(list.start, 1)
+        XCTAssertEqual(list.spread, false)
+
         XCTAssertEqual(first.checked, nil)
         XCTAssertEqual(first.spread, false)
         XCTAssertEqual(text.value, "First")
@@ -190,38 +232,116 @@ final class ParserBlockTests: XCTestCase {
     }
 
     func testListSpread() throws {
-            // given
-            let input =
-            """
-            - First
+        // given
+        let input =
+        """
+        - First
+
+        - Second
+
+        - Third
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let list = tree.children.first as! List
+        let first = list.children[0] as! ListItem
+        let second = list.children[1] as! ListItem
+        let third = list.children[2] as! ListItem
+        let text = (first.children.first as! Paragraph).children.first as! Text
+        let text2 = (second.children.first as! Paragraph).children.first as! Text
+        let text3 = (third.children.first as! Paragraph).children.first as! Text
+
+        // then
+        XCTAssertEqual(list.type, .list)
+        XCTAssertEqual(list.spread, true)
+
+        XCTAssertEqual(first.checked, nil)
+        XCTAssertEqual(first.spread, true)
+        XCTAssertEqual(text.value, "First")
+
+        XCTAssertEqual(second.checked, nil)
+        XCTAssertEqual(second.spread, true)
+        XCTAssertEqual(text2.value, "Second")
+
+        XCTAssertEqual(third.checked, nil)
+        XCTAssertEqual(third.spread, true)
+        XCTAssertEqual(text3.value, "Third")
+    }
+
+    func testListHierarchy() throws {
+        // given
+        let input =
+        """
+        - First
+            - Second
+                - Third
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let list = tree.children.first as! List
+        let first = list.children[0] as! ListItem
+        let second = (first.children[1] as! List).children.first as! ListItem
+        let third = (second.children[1] as! List).children.first as! ListItem
+        let text = (first.children.first as! Paragraph).children.first as! Text
+        let text2 = (second.children.first as! Paragraph).children.first as! Text
+        let text3 = (third.children.first as! Paragraph).children.first as! Text
+
+        // then
+        XCTAssertEqual(list.type, .list)
+        XCTAssertEqual(list.spread, false)
+
+        XCTAssertEqual(first.checked, nil)
+        XCTAssertEqual(first.spread, false)
+        XCTAssertEqual(text.value, "First")
+
+        XCTAssertEqual(second.checked, nil)
+        XCTAssertEqual(second.spread, false)
+        XCTAssertEqual(text2.value, "Second")
+
+        XCTAssertEqual(third.checked, nil)
+        XCTAssertEqual(third.spread, false)
+        XCTAssertEqual(text3.value, "Third")
+    }
+
+    func testListHierarchySpread() throws {
+        // given
+        let input =
+        """
+        - First
 
             - Second
 
-            - Third
-            """
+                - Third
 
-            // when
-            let tree = try Parser().parse(text: input)
-            let list = tree.children.first as! List
-            let first = list.children[0] as! ListItem
-            let second = list.children[1] as! ListItem
-            let third = list.children[2] as! ListItem
-            let text = (first.children.first as! Paragraph).children.first as! Text
-            let text2 = (second.children.first as! Paragraph).children.first as! Text
-            let text3 = (third.children.first as! Paragraph).children.first as! Text
+                - Third 2
+        """
 
-            // then
-            XCTAssertEqual(list.type, .list)
-            XCTAssertEqual(first.checked, nil)
-            XCTAssertEqual(first.spread, true)
-            XCTAssertEqual(text.value, "First")
+        // when
+        let tree = try Parser().parse(text: input)
+        let list = tree.children.first as! List
+        let first = list.children[0] as! ListItem
+        let second = (first.children[1] as! List).children.first as! ListItem
+        let third = (second.children[1] as! List).children.first as! ListItem
+        let text = (first.children.first as! Paragraph).children.first as! Text
+        let text2 = (second.children.first as! Paragraph).children.first as! Text
+        let text3 = (third.children.first as! Paragraph).children.first as! Text
 
-            XCTAssertEqual(second.checked, nil)
-            XCTAssertEqual(second.spread, true)
-            XCTAssertEqual(text2.value, "Second")
+        // then
+        XCTAssertEqual(list.type, .list)
+        XCTAssertEqual(list.spread, true)
 
-            XCTAssertEqual(third.checked, nil)
-            XCTAssertEqual(third.spread, true)
-            XCTAssertEqual(text3.value, "Third")
-        }
+        XCTAssertEqual(first.checked, nil)
+        XCTAssertEqual(first.spread, true)
+        XCTAssertEqual(text.value, "First")
+
+        XCTAssertEqual(second.checked, nil)
+        XCTAssertEqual(second.spread, true)
+        XCTAssertEqual(text2.value, "Second")
+
+        XCTAssertEqual(third.checked, nil)
+        XCTAssertEqual(third.spread, true)
+        XCTAssertEqual(text3.value, "Third")
+    }
 }

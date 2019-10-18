@@ -124,7 +124,8 @@ public class Parser {
 
                 case .list:
                     let ordered = node.listType == .ordered
-                    let start = Int(node.listStartingNumber)
+                    let listStartingNumber = Int(node.listStartingNumber)
+                    let start: Int? = listStartingNumber > 0 ? listStartingNumber : nil
                     let spread = !node.listTight
                     let children = try parseListContent(node.children, spread: spread)
                     items.append(List(ordered: ordered, start: start, spread: spread, children: children, position: node.position))
