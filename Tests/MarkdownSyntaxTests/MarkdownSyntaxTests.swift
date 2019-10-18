@@ -104,6 +104,81 @@ final class MarkdownSyntaxTests: XCTestCase {
         XCTAssertEqual(deleteText.value, "alpha")
     }
 
+    func testStrong() throws {
+        // given
+        let input = "**alpha**"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as! Paragraph
+        let node = paragraph.children.first as! Strong
+        let text = node.children.first as! Text
+
+        // then
+        XCTAssertEqual(node.type, .strong)
+        XCTAssertEqual(text.value, "alpha")
+    }
+
+    func testStrongUnderscore() throws {
+        // given
+        let input = "__alpha__"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as! Paragraph
+        let node = paragraph.children.first as! Strong
+        let text = node.children.first as! Text
+
+        // then
+        XCTAssertEqual(node.type, .strong)
+        XCTAssertEqual(text.value, "alpha")
+    }
+
+    func testEmphasis() throws {
+        // given
+        let input = "*alpha*"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as! Paragraph
+        let node = paragraph.children.first as! Emphasis
+        let text = node.children.first as! Text
+
+        // then
+        XCTAssertEqual(node.type, .emphasis)
+        XCTAssertEqual(text.value, "alpha")
+    }
+
+    func testEmphasisUnderscore() throws {
+        // given
+        let input = "_alpha_"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as! Paragraph
+        let node = paragraph.children.first as! Emphasis
+        let text = node.children.first as! Text
+
+        // then
+        XCTAssertEqual(node.type, .emphasis)
+        XCTAssertEqual(text.value, "alpha")
+    }
+
+    func testInlineCode() throws {
+        // given
+        let input = "`alpha`"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as! Paragraph
+        let node = paragraph.children.first as! InlineCode
+        let text = node.value
+
+        // then
+        XCTAssertEqual(node.type, .inlineCode)
+        XCTAssertEqual(text, "alpha")
+    }
+
     func testBreak() throws {
         // given
         let input = "foo\rbar"
@@ -112,15 +187,37 @@ final class MarkdownSyntaxTests: XCTestCase {
         let tree = try Parser().parse(text: input)
         let paragraph = tree.children.first as! Paragraph
 
-//        // then
+        // then
         XCTAssertNotNil(paragraph.children[0] as? Text)
         XCTAssertNotNil(paragraph.children[1] as? Break)
         XCTAssertNotNil(paragraph.children[2] as? Text)
     }
 
-//    func testFootnote() throws {
-//        FootnoteDefinition "[^alpha]: bravo and charlie."
-//        Footnote "[^alpha bravo]"
-//        FootnoteReference "[^alpha]"
-//    }
+    func testFootnote() throws {
+        // given
+        let input =
+        """
+        Here is a footnote reference,[^1] and another.[^longnote] and some more [^alpha bravo]
+
+        [^1]: Here is the footnote.
+        [^longnote]: Here's one with multiple blocks.
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as! Paragraph
+        let node = paragraph.children[1] as! FootnoteReference
+        let node2 = paragraph.children[3] as! FootnoteReference
+
+        // then
+        XCTAssertNotNil(tree)
+        XCTAssertEqual(node.type, .footnoteReference)
+        XCTAssertEqual(node2.type, .footnoteReference)
+        XCTAssertEqual(node.identifier, "1")
+        XCTAssertEqual(node.label, "1")
+        XCTAssertEqual(node2.identifier, "2")
+        XCTAssertEqual(node2.label, "2")
+//        XCTAssertEqual(node2.identifier, "longnote")
+//        XCTAssertEqual(node2.label, "longnote")
+    }
 }

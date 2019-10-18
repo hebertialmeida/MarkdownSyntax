@@ -23,14 +23,14 @@ extension CMNode {
         }
     }
 
-    func visitAll(where predicate: (CMNode) -> Bool) -> [CMNode] {
+    func getAll(where predicate: (CMNode) -> Bool) -> [CMNode] {
         var nodes: [CMNode] = []
 
         for c in children {
             if predicate(c) {
                 nodes.append(c)
             }
-            nodes.append(contentsOf: c.visitAll(where: predicate))
+            nodes.append(contentsOf: c.getAll(where: predicate))
         }
 
         return nodes
