@@ -155,6 +155,8 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(code.value, "<div id=\"foo\"\n  class=\"bar\">\n</div>\n")
     }
 
+    // MARK: - List
+
     func testList() throws {
         // given
         let input =
@@ -229,6 +231,51 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(third.checked, nil)
         XCTAssertEqual(third.spread, false)
         XCTAssertEqual(text3.value, "Third")
+    }
+
+    func testListTask() throws {
+        // given
+        let input =
+        """
+        - [ ] First
+        - [x] Second
+        - [X] Third
+        - [] Fourth
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let list = tree.children.first as! List
+        let first = list.children[0] as! ListItem
+        let second = list.children[1] as! ListItem
+        let third = list.children[2] as! ListItem
+        let fourth = list.children[3] as! ListItem
+        let text = (first.children.first as! Paragraph).children.first as! Text
+        let text2 = (second.children.first as! Paragraph).children.first as! Text
+        let text3 = (third.children.first as! Paragraph).children.first as! Text
+        let text4 = (fourth.children.first as! Paragraph).children.first as! Text
+
+        // then
+        XCTAssertEqual(list.type, .list)
+        XCTAssertEqual(list.ordered, false)
+        XCTAssertEqual(list.start, nil)
+        XCTAssertEqual(list.spread, false)
+
+        XCTAssertEqual(first.checked, false)
+        XCTAssertEqual(first.spread, false)
+        XCTAssertEqual(text.value, "First")
+
+        XCTAssertEqual(second.checked, true)
+        XCTAssertEqual(second.spread, false)
+        XCTAssertEqual(text2.value, "Second")
+
+        XCTAssertEqual(third.checked, true)
+        XCTAssertEqual(third.spread, false)
+        XCTAssertEqual(text3.value, "Third")
+
+        XCTAssertEqual(fourth.checked, nil)
+        XCTAssertEqual(fourth.spread, false)
+        XCTAssertEqual(text4.value, "[] Fourth")
     }
 
     func testListSpread() throws {
@@ -344,4 +391,6 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(third.spread, true)
         XCTAssertEqual(text3.value, "Third")
     }
+
+    // MARK: - Table
 }
