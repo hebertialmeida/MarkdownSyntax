@@ -7,9 +7,9 @@
 //
 
 public struct HTML: BlockContent, StaticPhrasingContent, PhrasingContent, Literal {
-    public var type: NodeType = .html
-    public var value: String
-    public var position: Position
+    public let type: NodeType = .html
+    public let value: String
+    public let position: Position
 
     public init(value: String, position: Position) {
         self.value = value

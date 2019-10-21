@@ -1,16 +1,13 @@
 //
-//  DocumentConverter.swift
-//  Maaku
+//  Parser.swift
+//  MarkdownSyntax
 //
-//  Created by Kris Baker on 12/20/17.
-//  Copyright © 2017 Kristopher Baker. All rights reserved.
+//  Created by Heberti Almeida on 2019-10-18.
+//  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
 /// Represents a way of converting a CMDocument to a Document
 public class Parser {
-
-    /// The converted block nodes.
-//    private var nodes: [Node] = []
 
     /// The current footnote index.
     private var footnoteIndex: Int = 0

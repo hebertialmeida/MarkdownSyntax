@@ -8,7 +8,7 @@
 
 public struct Emphasis: StaticPhrasingContent, PhrasingContent, Parent {
     public let type: NodeType = .emphasis
-    public var children: [PhrasingContent]
+    public let children: [PhrasingContent]
     public let position: Position
 
     public init(children: [PhrasingContent], position: Position) {

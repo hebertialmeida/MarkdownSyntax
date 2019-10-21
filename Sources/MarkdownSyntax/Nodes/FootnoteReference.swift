@@ -7,10 +7,10 @@
 //
 
 public struct FootnoteReference: StaticPhrasingContent, PhrasingContent, Association {
-    public var type: NodeType = .footnoteReference
-    public var identifier: String
-    public var label: String?
-    public var position: Position
+    public let type: NodeType = .footnoteReference
+    public let identifier: String
+    public let label: String?
+    public let position: Position
 
     public init(identifier: String, label: String?, position: Position) {
         self.identifier = identifier
