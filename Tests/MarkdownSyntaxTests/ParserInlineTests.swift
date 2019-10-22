@@ -259,16 +259,38 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let node = paragraph.children[1] as! FootnoteReference
-        let node2 = paragraph.children[3] as! FootnoteReference
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children[1] as? FootnoteReference
+        let node2 = paragraph?.children[3] as? FootnoteReference
 
         // then
-        XCTAssertEqual(node.type, .footnoteReference)
-        XCTAssertEqual(node2.type, .footnoteReference)
-        XCTAssertEqual(node.identifier, "1")
-        XCTAssertEqual(node.label, "1")
-        XCTAssertEqual(node2.identifier, "2")
-        XCTAssertEqual(node2.label, "2")
+        XCTAssertEqual(node?.type, .footnoteReference)
+        XCTAssertEqual(node2?.type, .footnoteReference)
+        XCTAssertEqual(node?.identifier, "1")
+        XCTAssertEqual(node?.label, "1")
+        XCTAssertEqual(node2?.identifier, "2")
+        XCTAssertEqual(node2?.label, "2")
+    }
+
+    func testHTMLInline() throws {
+        // given
+        let input = "<del>*foo*</del>"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as! Paragraph
+        let tag1 = paragraph.children[0] as! HTML
+        let emphasis = paragraph.children[1] as! Emphasis
+        let tag2 = paragraph.children[2] as! HTML
+
+        // then
+        XCTAssertEqual(tag1.type, .html)
+        XCTAssertEqual(tag1.value, "<del>")
+
+        XCTAssertEqual(emphasis.type, .emphasis)
+        XCTAssertEqual((emphasis.children.first as? Text)?.value, "foo")
+
+        XCTAssertEqual(tag2.type, .html)
+        XCTAssertEqual(tag2.value, "</del>")
     }
 }

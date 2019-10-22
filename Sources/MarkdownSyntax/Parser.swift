@@ -99,6 +99,11 @@ public class Parser {
             case .footnoteReference:
                 guard let value = node.literal else { break }
                 items.append(FootnoteReference(identifier: value, label: value, position: node.position))
+                
+            case .htmlInline:
+                guard let value = node.literal else { break }
+                items.append(HTML(value: value, position: node.position))
+                
             default:
                 break
             }
