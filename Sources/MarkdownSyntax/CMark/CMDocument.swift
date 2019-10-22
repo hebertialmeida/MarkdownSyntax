@@ -6,7 +6,7 @@
 //  Copyright © 2017 Kristopher Baker. All rights reserved.
 //
 
-import Foundation.NSData
+import struct Foundation.Data
 import libcmark_gfm
 
 /// Represents a cmark document error.

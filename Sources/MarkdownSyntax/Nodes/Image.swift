@@ -6,7 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
-import Foundation
+import struct Foundation.URL
 
 public struct Image: StaticPhrasingContent, PhrasingContent, Parent, Resource, Alternative {
     public let type: NodeType = .image

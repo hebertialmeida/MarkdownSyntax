@@ -6,7 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
-import Foundation
+import struct Foundation.URL
 
 public struct Link: PhrasingContent, Parent, Resource {
     public let type: NodeType = .link

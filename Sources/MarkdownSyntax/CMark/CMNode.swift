@@ -6,7 +6,7 @@
 //  Copyright © 2017 Kristopher Baker. All rights reserved.
 //
 
-import Foundation.NSURL
+import struct Foundation.URL
 import libcmark_gfm
 
 /// Represents a cmark node.

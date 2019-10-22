@@ -6,7 +6,7 @@
 //  Copyright © 2019 Kristopher Baker. All rights reserved.
 //
 
-import Foundation.NSURL
+import struct Foundation.URL
 import libcmark_gfm
 
 /// Extension for manipulating ndoe values and the Abstract Syntax Tree
