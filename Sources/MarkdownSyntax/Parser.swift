@@ -31,13 +31,13 @@ public class Parser {
         footnoteIndex = startingFootnoteIndex
 
         let cmNode = try CMDocument(text: text, options: [.sourcepos, .strikethroughDoubleTilde, .footnotes], extensions: [.all]).node
-        let items = try parseContent(cmNode.children)
+        let items = parseContent(cmNode.children)
         return Root(children: items, position: cmNode.position)
     }
 
     // MARK: Internal parsing
 
-    func parseContent(_ nodes: [CMNode] = []) throws -> [Content] {
+    func parseContent(_ nodes: [CMNode]) -> [Content] {
         var items = [Content]()
 
         for node in nodes {
@@ -45,17 +45,17 @@ public class Parser {
             case .footnoteDefinition:
                 footnoteIndex += 1
                 let value = "\(footnoteIndex)"
-                let children = try parseBlockContent(node.children)
+                let children = parseBlockContent(node.children)
                 items.append(FootnoteDefinition(identifier: value, label: value, children: children, position: node.position))
 
             default:
-                items.append(contentsOf: try parseBlockContent([node]))
+                items.append(contentsOf: parseBlockContent([node]))
             }
         }
         return items
     }
 
-    func parsePhrasingContent(_ nodes: [CMNode] = []) throws -> [PhrasingContent] {
+    func parsePhrasingContent(_ nodes: [CMNode]) -> [PhrasingContent] {
         var items = [PhrasingContent]()
 
         for node in nodes {
@@ -65,17 +65,17 @@ public class Parser {
                 items.append(Text(value: value, position: node.position))
 
             case .emphasis:
-                items.append(Emphasis(children: try parsePhrasingContent(node.children), position: node.position))
+                items.append(Emphasis(children: parsePhrasingContent(node.children), position: node.position))
 
             case .strong:
-                items.append(Strong(children: try parsePhrasingContent(node.children), position: node.position))
+                items.append(Strong(children: parsePhrasingContent(node.children), position: node.position))
 
             case .code:
                 guard let value = node.literal else { break }
                 items.append(InlineCode(value: value, position: node.position))
 
             case .extension(.strikethrough):
-                items.append(Delete(children: try parsePhrasingContent(node.children), position: node.position))
+                items.append(Delete(children: parsePhrasingContent(node.children), position: node.position))
 
             case .softBreak:
                 items.append(Break(position: node.position))
@@ -86,13 +86,13 @@ public class Parser {
             case .link:
                 guard
                     let url = node.linkUrl, let title = node.linkTitle,
-                    let children = try parsePhrasingContent(node.children) as? [StaticPhrasingContent]
+                    let children = parsePhrasingContent(node.children) as? [StaticPhrasingContent]
                 else { break }
                 items.append(Link(url: url, title: title, children: children, position: node.position))
 
             case .image:
                 guard let url = node.linkUrl, let title = node.linkTitle else { break }
-                let children = try parsePhrasingContent(node.children)
+                let children = parsePhrasingContent(node.children)
                 let alt = node.getAll(where: { $0.type == .text }).compactMap({$0.literal}).joined(separator: "")
                 items.append(Image(url: url, title: title, alt: alt, children: children, position: node.position))
 
@@ -111,14 +111,14 @@ public class Parser {
         return items
     }
 
-    func parseTableContent(_ nodes: [CMNode]) throws -> [TableContent] {
+    func parseTableContent(_ nodes: [CMNode]) -> [TableContent] {
         var items = [TableContent]()
 
         for node in nodes {
             switch node.type {
             case .extension(.tableRow):
                 let isHeader = node.humanReadableType == CMExtensionName.tableHeader.rawValue
-                let children = try parseRowContent(node.children)
+                let children = parseRowContent(node.children)
                 items.append(TableRow(isHeader: isHeader, children: children, position: node.position))
 
             default: break
@@ -127,41 +127,41 @@ public class Parser {
         return items
     }
 
-    func parseRowContent(_ nodes: [CMNode]) throws -> [RowContent] {
+    func parseRowContent(_ nodes: [CMNode]) -> [RowContent] {
         var items = [RowContent]()
 
         for node in nodes where node.type == .extension(.tableCell) {
-            let children = try parsePhrasingContent(node.children)
+            let children = parsePhrasingContent(node.children)
             items.append(TableCell(children: children, position: node.position))
         }
         return items
     }
 
-    func parseListContent(_ nodes: [CMNode] = [], spread: Bool?) throws -> [ListContent] {
+    func parseListContent(_ nodes: [CMNode], spread: Bool?) -> [ListContent] {
         var items = [ListContent]()
 
         for node in nodes where node.type == .item {
-            let children = try parseBlockContent(node.children)
+            let children = parseBlockContent(node.children)
             items.append(ListItem(checked: node.taskCompleted, spread: spread, children: children, position: node.position))
         }
         return items
     }
 
-    func parseBlockContent(_ nodes: [CMNode] = []) throws -> [BlockContent] {
+    func parseBlockContent(_ nodes: [CMNode]) -> [BlockContent] {
         var items = [BlockContent]()
 
         for node in nodes {
             switch node.type {
             case .heading:
-                let children = try parsePhrasingContent(node.children)
+                let children = parsePhrasingContent(node.children)
                 let depth = Heading.Depth(rawValue: Int(node.headingLevel)) ?? .h6
                 items.append(Heading(children: children, depth: depth, position: node.position))
 
             case .paragraph:
-                items.append(Paragraph(children: try parsePhrasingContent(node.children), position: node.position))
+                items.append(Paragraph(children: parsePhrasingContent(node.children), position: node.position))
 
             case .blockQuote:
-                items.append(Blockquote(children: try parseBlockContent(node.children), position: node.position))
+                items.append(Blockquote(children: parseBlockContent(node.children), position: node.position))
 
             case .thematicBreak:
                 items.append(ThematicBreak(position: node.position))
@@ -180,12 +180,12 @@ public class Parser {
                 let listStartingNumber = Int(node.listStartingNumber)
                 let start: Int? = listStartingNumber > 0 ? listStartingNumber : nil
                 let spread = !node.listTight
-                let children = try parseListContent(node.children, spread: spread)
+                let children = parseListContent(node.children, spread: spread)
                 items.append(List(ordered: ordered, start: start, spread: spread, children: children, position: node.position))
 
             case .extension(.table):
                 let align = node.getTableAlignments()
-                let children = try parseTableContent(node.children)
+                let children = parseTableContent(node.children)
                 items.append(Table(align: align, children: children, position: node.position))
 
             default:
