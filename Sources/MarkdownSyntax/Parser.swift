@@ -189,7 +189,6 @@ public class Parser {
                 items.append(Table(align: align, children: children, position: node.position))
 
             default:
-                print("missing:", node.type)
                 break
             }
         }

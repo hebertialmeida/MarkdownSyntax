@@ -228,7 +228,7 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertNotNil(tree.children[0] as? Paragraph)
         XCTAssertNotNil(tree.children[1] as? Paragraph)
     }
-    
+
     func testSpaceLineBreak() throws {
         // given
         let input =
