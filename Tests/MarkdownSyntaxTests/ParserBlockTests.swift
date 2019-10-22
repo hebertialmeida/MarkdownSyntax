@@ -393,4 +393,49 @@ final class ParserBlockTests: XCTestCase {
     }
 
     // MARK: - Table
+
+    func testTable() throws {
+        // given
+        let input =
+        """
+        | foo | bar | mar | tara |
+        | :-- | :-: | --- | ---: |
+        | baz | qux | zee | zeet |
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let table = tree.children.first as! Table
+        let row0 = table.children[0] as! TableRow
+        let row1 = table.children[1] as! TableRow
+
+        let textCell0Row0 = (row0.children[0] as! TableCell).children[0] as! Text
+        let textCell1Row0 = (row0.children[1] as! TableCell).children[0] as! Text
+        let textCell2Row0 = (row0.children[2] as! TableCell).children[0] as! Text
+        let textCell3Row0 = (row0.children[3] as! TableCell).children[0] as! Text
+
+        let textCell0Row1 = (row1.children[0] as! TableCell).children[0] as! Text
+        let textCell1Row1 = (row1.children[1] as! TableCell).children[0] as! Text
+        let textCell2Row1 = (row1.children[2] as! TableCell).children[0] as! Text
+        let textCell3Row1 = (row1.children[3] as! TableCell).children[0] as! Text
+
+        // then
+        XCTAssertEqual(table.type, .table)
+        XCTAssertEqual(table.align, [.left, .center, .none, .right])
+
+        XCTAssertEqual(row0.type, .tableRow)
+        XCTAssertEqual(row0.isHeader, true)
+        XCTAssertEqual(row1.type, .tableRow)
+        XCTAssertEqual(row1.isHeader, false)
+
+        XCTAssertEqual(textCell0Row0.value, "foo")
+        XCTAssertEqual(textCell1Row0.value, "bar")
+        XCTAssertEqual(textCell2Row0.value, "mar")
+        XCTAssertEqual(textCell3Row0.value, "tara")
+
+        XCTAssertEqual(textCell0Row1.value, "baz")
+        XCTAssertEqual(textCell1Row1.value, "qux")
+        XCTAssertEqual(textCell2Row1.value, "zee")
+        XCTAssertEqual(textCell3Row1.value, "zeet")
+    }
 }

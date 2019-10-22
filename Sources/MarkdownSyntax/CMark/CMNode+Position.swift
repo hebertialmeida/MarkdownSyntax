@@ -1,8 +1,9 @@
 //
 //  CMNode+Position.swift
-//  
+//  MarkdownSyntax
 //
 //  Created by Heberti Almeida on 2019-10-17.
+//  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
 extension CMNode {

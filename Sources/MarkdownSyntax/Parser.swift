@@ -37,6 +37,24 @@ public class Parser {
 
     // MARK: Internal parsing
 
+    func parseContent(_ nodes: [CMNode] = []) throws -> [Content] {
+        var items = [Content]()
+
+        for node in nodes {
+            switch node.type {
+            case .footnoteDefinition:
+                footnoteIndex += 1
+                let value = "\(footnoteIndex)"
+                let children = try parseBlockContent(node.children)
+                items.append(FootnoteDefinition(identifier: value, label: value, children: children, position: node.position))
+
+            default:
+                items.append(contentsOf: try parseBlockContent([node]))
+            }
+        }
+        return items
+    }
+
     func parsePhrasingContent(_ nodes: [CMNode] = []) throws -> [PhrasingContent] {
         var items = [PhrasingContent]()
 
@@ -81,6 +99,32 @@ public class Parser {
             default:
                 break
             }
+        }
+        return items
+    }
+
+    func parseTableContent(_ nodes: [CMNode]) throws -> [TableContent] {
+        var items = [TableContent]()
+
+        for node in nodes {
+            switch node.type {
+            case .extension(.tableRow):
+                let isHeader = node.humanReadableType == CMExtensionName.tableHeader.rawValue
+                let children = try parseRowContent(node.children)
+                items.append(TableRow(isHeader: isHeader, children: children, position: node.position))
+
+            default: break
+            }
+        }
+        return items
+    }
+
+    func parseRowContent(_ nodes: [CMNode]) throws -> [RowContent] {
+        var items = [RowContent]()
+
+        for node in nodes where node.type == .extension(.tableCell) {
+            let children = try parsePhrasingContent(node.children)
+            items.append(TableCell(children: children, position: node.position))
         }
         return items
     }
@@ -131,29 +175,14 @@ public class Parser {
                 let children = try parseListContent(node.children, spread: spread)
                 items.append(List(ordered: ordered, start: start, spread: spread, children: children, position: node.position))
 
-//                case .extension(.table):
+            case .extension(.table):
+                let align = node.getTableAlignments()
+                let children = try parseTableContent(node.children)
+                items.append(Table(align: align, children: children, position: node.position))
 
             default:
                 print("missing:", node.type)
                 break
-            }
-        }
-        return items
-    }
-
-    func parseContent(_ nodes: [CMNode] = []) throws -> [Content] {
-        var items = [Content]()
-
-        for node in nodes {
-            switch node.type {
-            case .footnoteDefinition:
-                footnoteIndex += 1
-                let value = "\(footnoteIndex)"
-                let children = try parseBlockContent(node.children)
-                items.append(FootnoteDefinition(identifier: value, label: value, children: children, position: node.position))
-
-            default:
-                items.append(contentsOf: try parseBlockContent([node]))
             }
         }
         return items

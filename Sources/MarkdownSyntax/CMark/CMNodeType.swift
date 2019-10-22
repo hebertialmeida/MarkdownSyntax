@@ -42,8 +42,6 @@ public enum CMNodeExtensionType: Equatable {
             self = .tableRow
         case CMARK_NODE_TABLE_CELL.rawValue:
             self = .tableCell
-        case CMARK_NODE_TABLE_ROW.rawValue:
-            self = .tableRow
         default:
             self = .other(rawValue)
         }
