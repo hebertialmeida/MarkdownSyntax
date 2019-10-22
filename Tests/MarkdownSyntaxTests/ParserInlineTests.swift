@@ -19,6 +19,25 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(link.title, "bravo")
         XCTAssertEqual(linkText.value, "alpha")
     }
+    
+    func testAutoLink() throws {
+        // given
+        let input = "https://example.com"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as! Paragraph
+        let text = paragraph.children[0] as! Text
+        let link = paragraph.children[1] as! Link
+        let linkText = link.children.first as! Text
+
+        // then
+        XCTAssertEqual(text.value, "")
+        XCTAssertEqual(link.type, .link)
+        XCTAssertEqual(link.url.absoluteString, "https://example.com")
+        XCTAssertEqual(link.title, "")
+        XCTAssertEqual(linkText.value, "https://example.com")
+    }
 
     func testLinkWithEmptyChildTitle() throws {
         // given
