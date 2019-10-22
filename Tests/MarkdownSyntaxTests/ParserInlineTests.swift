@@ -9,15 +9,15 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let link = paragraph.children.first as! Link
-        let linkText = link.children.first as! Text
+        let paragraph = tree.children.first as? Paragraph
+        let link = paragraph?.children.first as? Link
+        let linkText = link?.children.first as? Text
 
         // then
-        XCTAssertEqual(link.type, .link)
-        XCTAssertEqual(link.url.absoluteString, "https://example.com")
-        XCTAssertEqual(link.title, "bravo")
-        XCTAssertEqual(linkText.value, "alpha")
+        XCTAssertEqual(link?.type, .link)
+        XCTAssertEqual(link?.url.absoluteString, "https://example.com")
+        XCTAssertEqual(link?.title, "bravo")
+        XCTAssertEqual(linkText?.value, "alpha")
     }
     
     func testAutoLink() throws {
@@ -26,17 +26,17 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let text = paragraph.children[0] as! Text
-        let link = paragraph.children[1] as! Link
-        let linkText = link.children.first as! Text
+        let paragraph = tree.children.first as? Paragraph
+        let text = paragraph?.children[0] as? Text
+        let link = paragraph?.children[1] as? Link
+        let linkText = link?.children.first as? Text
 
         // then
-        XCTAssertEqual(text.value, "")
-        XCTAssertEqual(link.type, .link)
-        XCTAssertEqual(link.url.absoluteString, "https://example.com")
-        XCTAssertEqual(link.title, "")
-        XCTAssertEqual(linkText.value, "https://example.com")
+        XCTAssertEqual(text?.value, "")
+        XCTAssertEqual(link?.type, .link)
+        XCTAssertEqual(link?.url.absoluteString, "https://example.com")
+        XCTAssertEqual(link?.title, "")
+        XCTAssertEqual(linkText?.value, "https://example.com")
     }
 
     func testLinkWithEmptyChildTitle() throws {
@@ -45,14 +45,14 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let link = paragraph.children.first as! Link
+        let paragraph = tree.children.first as? Paragraph
+        let link = paragraph?.children.first as? Link
 
         // then
-        XCTAssertEqual(link.type, .link)
-        XCTAssertEqual(link.url.absoluteString, "https://example.com")
-        XCTAssertEqual(link.title, "")
-        XCTAssertEqual(link.children.count, 0)
+        XCTAssertEqual(link?.type, .link)
+        XCTAssertEqual(link?.url.absoluteString, "https://example.com")
+        XCTAssertEqual(link?.title, "")
+        XCTAssertEqual(link?.children.count, 0)
     }
 
     func testInternalLink() throws {
@@ -61,15 +61,15 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let link = paragraph.children.first as! Link
-        let linkText = link.children.first as! Text
+        let paragraph = tree.children.first as? Paragraph
+        let link = paragraph?.children.first as? Link
+        let linkText = link?.children.first as? Text
 
         // then
-        XCTAssertEqual(link.type, .link)
-        XCTAssertEqual(link.url.absoluteString, "#some-topic")
-        XCTAssertEqual(link.title, "")
-        XCTAssertEqual(linkText.value, "Page 52")
+        XCTAssertEqual(link?.type, .link)
+        XCTAssertEqual(link?.url.absoluteString, "#some-topic")
+        XCTAssertEqual(link?.title, "")
+        XCTAssertEqual(linkText?.value, "Page 52")
     }
 
     func testImage() throws {
@@ -78,14 +78,14 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let image = paragraph.children.first as! Image
+        let paragraph = tree.children.first as? Paragraph
+        let image = paragraph?.children.first as? Image
 
         // then
-        XCTAssertEqual(image.type, .image)
-        XCTAssertEqual(image.url.absoluteString, "https://example.com/favicon.ico")
-        XCTAssertEqual(image.title, "bravo")
-        XCTAssertEqual(image.alt, "alpha")
+        XCTAssertEqual(image?.type, .image)
+        XCTAssertEqual(image?.url.absoluteString, "https://example.com/favicon.ico")
+        XCTAssertEqual(image?.title, "bravo")
+        XCTAssertEqual(image?.alt, "alpha")
     }
 
     func testImageWithLinkInsideAlt() throws {
@@ -94,18 +94,18 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let image = paragraph.children.first as! Image
-        let link = image.children[1] as! Link
-        let linkText = link.children.first as! Text
+        let paragraph = tree.children.first as? Paragraph
+        let image = paragraph?.children.first as? Image
+        let link = image?.children[1] as? Link
+        let linkText = link?.children.first as? Text
 
         // then
-        XCTAssertEqual(image.type, .image)
-        XCTAssertEqual(image.url.absoluteString, "https://example.com/favicon.ico")
-        XCTAssertEqual(image.title, "bravo")
-        XCTAssertEqual(image.alt, "foo bar")
-        XCTAssertEqual(link.url.absoluteString, "/url")
-        XCTAssertEqual(linkText.value, "bar")
+        XCTAssertEqual(image?.type, .image)
+        XCTAssertEqual(image?.url.absoluteString, "https://example.com/favicon.ico")
+        XCTAssertEqual(image?.title, "bravo")
+        XCTAssertEqual(image?.alt, "foo bar")
+        XCTAssertEqual(link?.url.absoluteString, "/url")
+        XCTAssertEqual(linkText?.value, "bar")
     }
 
     func testStrikethrough() throws {
@@ -114,13 +114,13 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let delete = paragraph.children.first as! Delete
-        let deleteText = delete.children.first as! Text
+        let paragraph = tree.children.first as? Paragraph
+        let delete = paragraph?.children.first as? Delete
+        let deleteText = delete?.children.first as? Text
 
         // then
-        XCTAssertEqual(delete.type, .delete)
-        XCTAssertEqual(deleteText.value, "alpha")
+        XCTAssertEqual(delete?.type, .delete)
+        XCTAssertEqual(deleteText?.value, "alpha")
     }
 
     func testStrong() throws {
@@ -129,13 +129,13 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let node = paragraph.children.first as! Strong
-        let text = node.children.first as! Text
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children.first as? Strong
+        let text = node?.children.first as? Text
 
         // then
-        XCTAssertEqual(node.type, .strong)
-        XCTAssertEqual(text.value, "alpha")
+        XCTAssertEqual(node?.type, .strong)
+        XCTAssertEqual(text?.value, "alpha")
     }
 
     func testStrongUnderscore() throws {
@@ -144,13 +144,13 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let node = paragraph.children.first as! Strong
-        let text = node.children.first as! Text
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children.first as? Strong
+        let text = node?.children.first as? Text
 
         // then
-        XCTAssertEqual(node.type, .strong)
-        XCTAssertEqual(text.value, "alpha")
+        XCTAssertEqual(node?.type, .strong)
+        XCTAssertEqual(text?.value, "alpha")
     }
 
     func testEmphasis() throws {
@@ -159,13 +159,13 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let node = paragraph.children.first as! Emphasis
-        let text = node.children.first as! Text
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children.first as? Emphasis
+        let text = node?.children.first as? Text
 
         // then
-        XCTAssertEqual(node.type, .emphasis)
-        XCTAssertEqual(text.value, "alpha")
+        XCTAssertEqual(node?.type, .emphasis)
+        XCTAssertEqual(text?.value, "alpha")
     }
 
     func testEmphasisUnderscore() throws {
@@ -174,13 +174,13 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let node = paragraph.children.first as! Emphasis
-        let text = node.children.first as! Text
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children.first as? Emphasis
+        let text = node?.children.first as? Text
 
         // then
-        XCTAssertEqual(node.type, .emphasis)
-        XCTAssertEqual(text.value, "alpha")
+        XCTAssertEqual(node?.type, .emphasis)
+        XCTAssertEqual(text?.value, "alpha")
     }
 
     func testInlineCode() throws {
@@ -189,12 +189,12 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let node = paragraph.children.first as! InlineCode
-        let text = node.value
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children.first as? InlineCode
+        let text = node?.value
 
         // then
-        XCTAssertEqual(node.type, .inlineCode)
+        XCTAssertEqual(node?.type, .inlineCode)
         XCTAssertEqual(text, "alpha")
     }
 
@@ -204,12 +204,12 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
+        let paragraph = tree.children.first as? Paragraph
 
         // then
-        XCTAssertNotNil(paragraph.children[0] as? Text)
-        XCTAssertNotNil(paragraph.children[1] as? Break)
-        XCTAssertNotNil(paragraph.children[2] as? Text)
+        XCTAssertNotNil(paragraph?.children[0] as? Text)
+        XCTAssertNotNil(paragraph?.children[1] as? Break)
+        XCTAssertNotNil(paragraph?.children[2] as? Text)
     }
 
     func testLineBreak() throws {
@@ -239,12 +239,12 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
+        let paragraph = tree.children.first as? Paragraph
 
         // then
-        XCTAssertNotNil(paragraph.children[0] as? Text)
-        XCTAssertNotNil(paragraph.children[1] as? LineBreak)
-        XCTAssertNotNil(paragraph.children[2] as? Text)
+        XCTAssertNotNil(paragraph?.children[0] as? Text)
+        XCTAssertNotNil(paragraph?.children[1] as? LineBreak)
+        XCTAssertNotNil(paragraph?.children[2] as? Text)
     }
 
     func testFootnoteReference() throws {
@@ -278,19 +278,19 @@ final class ParserInlineTests: XCTestCase {
 
         // when
         let tree = try Parser().parse(text: input)
-        let paragraph = tree.children.first as! Paragraph
-        let tag1 = paragraph.children[0] as! HTML
-        let emphasis = paragraph.children[1] as! Emphasis
-        let tag2 = paragraph.children[2] as! HTML
+        let paragraph = tree.children.first as? Paragraph
+        let tag1 = paragraph?.children[0] as? HTML
+        let emphasis = paragraph?.children[1] as? Emphasis
+        let tag2 = paragraph?.children[2] as? HTML
 
         // then
-        XCTAssertEqual(tag1.type, .html)
-        XCTAssertEqual(tag1.value, "<del>")
+        XCTAssertEqual(tag1?.type, .html)
+        XCTAssertEqual(tag1?.value, "<del>")
 
-        XCTAssertEqual(emphasis.type, .emphasis)
-        XCTAssertEqual((emphasis.children.first as? Text)?.value, "foo")
+        XCTAssertEqual(emphasis?.type, .emphasis)
+        XCTAssertEqual((emphasis?.children.first as? Text)?.value, "foo")
 
-        XCTAssertEqual(tag2.type, .html)
-        XCTAssertEqual(tag2.value, "</del>")
+        XCTAssertEqual(tag2?.type, .html)
+        XCTAssertEqual(tag2?.value, "</del>")
     }
 }
