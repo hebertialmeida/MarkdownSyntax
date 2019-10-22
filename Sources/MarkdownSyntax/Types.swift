@@ -29,6 +29,7 @@ public enum NodeType: String, Codable {
     case delete
     case inlineCode
     case `break`
+    case lineBreak
     case link
     case image
     case linkReference

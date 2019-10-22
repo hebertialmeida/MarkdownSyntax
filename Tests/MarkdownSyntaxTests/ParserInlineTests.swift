@@ -193,6 +193,41 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertNotNil(paragraph.children[2] as? Text)
     }
 
+    func testLineBreak() throws {
+        // given
+        let input =
+        """
+        foo
+
+        baz
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+
+        // then
+        XCTAssertNotNil(tree.children[0] as? Paragraph)
+        XCTAssertNotNil(tree.children[1] as? Paragraph)
+    }
+    
+    func testSpaceLineBreak() throws {
+        // given
+        let input =
+        """
+        test  
+        test
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as! Paragraph
+
+        // then
+        XCTAssertNotNil(paragraph.children[0] as? Text)
+        XCTAssertNotNil(paragraph.children[1] as? LineBreak)
+        XCTAssertNotNil(paragraph.children[2] as? Text)
+    }
+
     func testFootnoteReference() throws {
         // given
         let input =

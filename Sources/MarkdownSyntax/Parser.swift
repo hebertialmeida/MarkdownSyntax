@@ -80,6 +80,9 @@ public class Parser {
             case .softBreak:
                 items.append(Break(position: node.position))
 
+            case .lineBreak:
+                items.append(LineBreak(position: node.position))
+
             case .link:
                 guard
                     let url = node.linkUrl, let title = node.linkTitle,
