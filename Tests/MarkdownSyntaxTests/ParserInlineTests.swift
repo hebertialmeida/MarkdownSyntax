@@ -200,7 +200,7 @@ final class ParserInlineTests: XCTestCase {
 
     func testBreak() throws {
         // given
-        let input = "foo\rbar"
+        let input = "foo\nbar"
 
         // when
         let tree = try Parser().parse(text: input)
@@ -208,7 +208,7 @@ final class ParserInlineTests: XCTestCase {
 
         // then
         XCTAssertNotNil(paragraph?.children[0] as? Text)
-        XCTAssertNotNil(paragraph?.children[1] as? Break)
+        XCTAssertNotNil(paragraph?.children[1] as? SoftBreak)
         XCTAssertNotNil(paragraph?.children[2] as? Text)
     }
 
@@ -243,7 +243,7 @@ final class ParserInlineTests: XCTestCase {
 
         // then
         XCTAssertNotNil(paragraph?.children[0] as? Text)
-        XCTAssertNotNil(paragraph?.children[1] as? LineBreak)
+        XCTAssertNotNil(paragraph?.children[1] as? Break)
         XCTAssertNotNil(paragraph?.children[2] as? Text)
     }
 

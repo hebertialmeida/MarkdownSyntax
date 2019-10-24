@@ -84,10 +84,10 @@ public class Parser {
                 items.append(Delete(children: parsePhrasingContent(node.children), position: node.position(in: text, using: lineNumbers)))
 
             case .softBreak:
-                items.append(Break(position: node.position(in: text, using: lineNumbers)))
+                items.append(SoftBreak(position: node.position(in: text, using: lineNumbers)))
 
             case .lineBreak:
-                items.append(LineBreak(position: node.position(in: text, using: lineNumbers)))
+                items.append(Break(position: node.position(in: text, using: lineNumbers)))
 
             case .link:
                 guard

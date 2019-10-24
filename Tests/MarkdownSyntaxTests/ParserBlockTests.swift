@@ -91,12 +91,12 @@ final class ParserBlockTests: XCTestCase {
         let blockquote = tree.children.first as? Blockquote
         let paragraph = blockquote?.children.first as? Paragraph
         let text = paragraph?.children.first as? Text
-        let softBreak = paragraph?.children[1] as? Break
+        let softBreak = paragraph?.children[1] as? SoftBreak
         let text2 = paragraph?.children[2] as? Text
 
         // then
         XCTAssertEqual(blockquote?.type, .blockquote)
-        XCTAssertEqual(softBreak?.type, .break)
+        XCTAssertEqual(softBreak?.type, .softBreak)
         XCTAssertEqual(text?.value, "Alpha bravo charlie.")
         XCTAssertEqual(text2?.value, "This is the second line.")
     }
