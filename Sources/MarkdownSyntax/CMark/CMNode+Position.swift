@@ -8,12 +8,32 @@
 
 extension CMNode {
 
-    var position: Position {
-        return Position(
-            start: Point(line: Int(startLine), column: Int(startColumn), offset: nil),
-            end: Point(line: Int(endLine), column: Int(endColumn), offset: nil),
-            indent: nil
-        )
+    func position(in text: String, using lineNumbers: [String.Index]) -> Position {
+        let startLine = Int(self.startLine)
+        let startColumn = Int(self.startColumn)
+        let endLine = Int(self.endLine)
+        let endColumn = Int(self.endColumn)
+
+        var startPoint = Point(line: startLine, column: startColumn, offset: nil)
+        var endPoint = Point(line: endLine, column: endColumn, offset: nil)
+
+        func index(of point: Point) -> String.Index {
+//            return text.utf16.index(lineNumbers[point.line-1], offsetBy: point.column-1)
+            return text.utf8.index(lineNumbers[point.line-1], offsetBy: point.column-1)
+        }
+
+        func failEarly() -> Position {
+            return Position(start: startPoint, end: endPoint, indent: nil)
+        }
+
+        guard startColumn > 0 && startLine > 0 else { return failEarly() }
+        let start = index(of: startPoint)
+        let end = index(of: endPoint)
+        guard start <= end, start >= text.startIndex, end < text.endIndex else { return failEarly() } // todo should be error?
+
+        startPoint = Point(line: startLine, column: startColumn, offset: start)
+        endPoint = Point(line: endLine, column: endColumn, offset: end)
+        return Position(start: startPoint, end: endPoint, indent: nil)
     }
 
     /// When visiting a node, you can modify the state, and the modified state gets passed on to all children.

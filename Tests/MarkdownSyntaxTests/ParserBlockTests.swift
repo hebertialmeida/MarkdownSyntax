@@ -31,6 +31,9 @@ final class ParserBlockTests: XCTestCase {
         let text6 = heading6?.children.first as? Text
 
         // then
+        let range = input.startIndex...input.index(input.startIndex, offsetBy: 9)
+        XCTAssertEqual(heading1?.position.range, range)
+
         XCTAssertEqual(heading1?.type, .heading)
         XCTAssertEqual(heading2?.type, .heading)
         XCTAssertEqual(heading3?.type, .heading)

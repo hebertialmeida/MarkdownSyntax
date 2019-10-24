@@ -14,10 +14,10 @@ public struct Point: Equatable {
     /// Column in a source file (1-indexed integer).
     public var column: Int
 
-    /// Character in a source file (0-indexed integer).
-    public var offset: Int?
+    /// Character index in a source file.
+    public var offset: String.Index?
 
-    public init(line: Int, column: Int, offset: Int?) {
+    public init(line: Int, column: Int, offset: String.Index?) {
         self.line = line
         self.column = column
         self.offset = offset
