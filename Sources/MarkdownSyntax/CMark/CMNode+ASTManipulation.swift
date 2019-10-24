@@ -1,6 +1,6 @@
 //
 //  CMNode+ASTManipulation.swift
-//  Maaku
+//  MarkdownSyntax
 //
 //  Created by Tim Learmont on 5/29/19.
 //  Copyright © 2019 Kristopher Baker. All rights reserved.

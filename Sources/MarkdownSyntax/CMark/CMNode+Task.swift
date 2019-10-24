@@ -1,6 +1,6 @@
 //
 //  CMNode+Task.swift
-//  Maaku
+//  MarkdownSyntax
 //
 //  Created by Kristopher Baker on 2019/05/23.
 //  Copyright © 2019 Kristopher Baker. All rights reserved.

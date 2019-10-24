@@ -1,6 +1,6 @@
 //
 //  CMNodeType.swift
-//  Maaku
+//  MarkdownSyntax
 //
 //  Created by Honghao Zhang on 4/22/19.
 //  Copyright © 2017 Kristopher Baker. All rights reserved.
