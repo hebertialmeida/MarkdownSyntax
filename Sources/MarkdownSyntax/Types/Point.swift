@@ -8,13 +8,13 @@
 
 /// One place in a source file.
 public struct Point: Equatable {
-    /// Line in a source file (1-indexed integer).
+    /// Line in a source file (1-indexed `Int`).
     public var line: Int
 
-    /// Column in a source file (1-indexed integer).
+    /// Column in a source file (1-indexed `Int`).
     public var column: Int
 
-    /// Character index in a source file.
+    /// Character index in a source file (0-indexed `String.Index`).
     public var offset: String.Index?
 
     public init(line: Int, column: Int, offset: String.Index?) {

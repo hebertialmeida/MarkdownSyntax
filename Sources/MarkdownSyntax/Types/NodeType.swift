@@ -20,7 +20,7 @@ public enum NodeType: String, Codable {
     case html
     case code
     case yaml
-    case definition //
+    case definition
     case footnoteDefinition
     case text
     case emphasis

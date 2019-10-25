@@ -9,10 +9,8 @@
 import libcmark_gfm
 
 extension CMNode {
-    func getTableAlignments() -> [AlignType]? {
-        guard type == .extension(.table) else {
-            return nil
-        }
+    func getTableAlignments() -> [AlignType] {
+        guard type == .extension(.table) else { return [] }
 
         let columns = cmark_gfm_extensions_get_table_columns(cmarkNode)
         var alignments = cmark_gfm_extensions_get_table_alignments(cmarkNode)
