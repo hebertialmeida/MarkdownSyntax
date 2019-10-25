@@ -152,4 +152,93 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(node?.position.range, range)
         XCTAssertEqual(input[range], "_alpha_")
     }
+
+    func testInlineCodeRange() throws {
+        // given
+        let input = "`alpha`"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children.first as? InlineCode
+        let range = input.range(0...6)
+
+        // then
+        XCTAssertEqual(node?.position.range, range)
+        XCTAssertEqual(input[range], "`alpha`")
+    }
+
+    func testSoftBreakRange() throws {
+        // given
+        let input = "foo\nbar"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as? Paragraph
+        let softBreak = paragraph?.children[1] as? SoftBreak
+
+        // then
+        XCTAssertNil(softBreak?.position.range) // Cmark don't return any position for SoftBreak
+    }
+
+    func testSpaceLineBreakRange() throws {
+        // given
+        let input =
+        """
+        test
+        test
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as? Paragraph
+        let lineBreak = paragraph?.children[1] as? Break
+
+        // then
+        XCTAssertNil(lineBreak?.position.range) // Cmark don't return any position for LineBreak
+    }
+
+    func testFootnoteReferenceRange() throws {
+        // given
+        let input =
+        """
+        Here is a footnote reference,[^1] and another.[^longnote] and some more [^alpha bravo]
+
+        [^1]: Here is the footnote.
+        [^longnote]: Here's one with multiple blocks.
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children[1] as? FootnoteReference
+        let node2 = paragraph?.children[3] as? FootnoteReference
+        let range = input.range(29...32)
+        let range2 = input.range(46...56)
+
+        // then
+        XCTAssertEqual(node?.position.range, range)
+        XCTAssertEqual(input[range], "[^1]")
+        XCTAssertEqual(node2?.position.range, range2)
+        XCTAssertEqual(input[range2], "[^longnote]")
+    }
+
+    func testHTMLInlineRange() throws {
+        // given
+        let input = "<del>*foo*</del>"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as? Paragraph
+        let tag1 = paragraph?.children[0] as? HTML
+        let tag2 = paragraph?.children[2] as? HTML
+        let range = input.range(0...4)
+        let range2 = input.range(10...15)
+
+        // then
+        XCTAssertEqual(tag1?.position.range, range)
+        XCTAssertEqual(input[range], "<del>")
+        XCTAssertEqual(tag2?.position.range, range2)
+        XCTAssertEqual(input[range2], "</del>")
+    }
 }

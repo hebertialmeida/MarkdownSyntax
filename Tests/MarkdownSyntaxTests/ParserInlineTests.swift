@@ -198,7 +198,7 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(text, "alpha")
     }
 
-    func testBreak() throws {
+    func testSoftBreak() throws {
         // given
         let input = "foo\nbar"
 

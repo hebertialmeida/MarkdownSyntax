@@ -34,6 +34,8 @@ final class ContentBlockPositionTests: XCTestCase {
         # Header 👨‍👩‍👦‍👦 with **bold** text
 
         This book **focuses on *five different* implementations** of the Recordings **application** using the following application design *patterns*.
+
+        Now adding some `alpha-inline` code.
         """
 
         // when
@@ -60,5 +62,28 @@ final class ContentBlockPositionTests: XCTestCase {
 
         XCTAssertEqual(paragraphStrong2?.position.range, paragraphStrongRange2)
         XCTAssertEqual(input[paragraphStrongRange2], "**application**")
+    }
+
+    func testParagraphWithInlineCode() throws {
+        // given
+        let input =
+        """
+        # Header 👨‍👩‍👦‍👦 with **bold** text
+
+        This book **focuses on *five different* implementations** of the Recordings **application** using the following application design *patterns*.
+
+        Now adding some `alpha-inline` code.
+        """
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children[2] as? Paragraph
+        let inlineCode = paragraph?.children[1] as? InlineCode
+
+        let inlineCodeRange = input.range(191...204)
+
+        // then
+        XCTAssertEqual(inlineCode?.position.range, inlineCodeRange)
+        XCTAssertEqual(input[inlineCodeRange], "`alpha-inline`")
     }
 }

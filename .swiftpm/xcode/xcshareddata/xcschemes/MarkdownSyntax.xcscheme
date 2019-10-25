@@ -52,6 +52,11 @@
                BlueprintName = "MarkdownSyntaxTests"
                ReferencedContainer = "container:">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "ContentInlinePositionTests/testAutoLinkRange()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>
