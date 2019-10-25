@@ -12,7 +12,7 @@ public class Parser {
     /// The current footnote index.
     private var footnoteIndex: Int = 0
 
-    private var lineNumbers: [String.Index] = []
+    private var lineOffsets: [String.Index] = []
 
     private var text = ""
 
@@ -34,7 +34,7 @@ public class Parser {
     public func parse(text: String, startingFootnoteIndex: Int = 0) throws -> Root {
         self.text = text
         self.footnoteIndex = startingFootnoteIndex
-        self.lineNumbers = text.unicodeScalars.lineIndices
+        self.lineOffsets = text.lineOffsets
 
         let node = try CMDocument(text: text, options: [.sourcepos, .strikethroughDoubleTilde, .footnotes], extensions: [.all]).node
         let items = parseContent(node.children)
@@ -204,6 +204,6 @@ public class Parser {
     // MARK: Position
 
     func position(for node: CMNode) -> Position {
-        return node.position(in: text, using: lineNumbers)
+        return node.position(in: text, using: lineOffsets)
     }
 }
