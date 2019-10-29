@@ -1,7 +1,11 @@
 name: Swift
+
+
 on: [push, pull_request]
+
 jobs:
   build:
+
     runs-on: macOS-latest
  
     steps:
@@ -9,11 +13,5 @@ jobs:
     - uses: YOCKOW/Action-setup-swift@master
       with:
         swift-version: '5.1'
-
     - name: Run tests
       run: swift test --enable-code-coverage -v
-
-    - name: Upload coverage to Codecov
-    - uses: codecov/codecov-action@v1.0.3
-      with:
-        token: ${{secrets.CODECOV_TOKEN}}
