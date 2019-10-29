@@ -18,20 +18,20 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], #"[alpha](https://example.com "bravo")"#)
     }
 
-    func testAutoLinkRange() throws {
-        // given
-        let input = "https://example.com"
-
-        // when
-        let tree = try Markdown(text: input).parse()
-        let paragraph = tree.children.first as? Paragraph
-        let link = paragraph?.children[1] as? Link
-        let range = input.range(0...18)
-
-        // then
-        XCTAssertEqual(link?.position.range, range)
-        XCTAssertEqual(input[range], "https://example.com")
-    }
+//    func testAutoLinkRange() throws {
+//        // given
+//        let input = "https://example.com"
+//
+//        // when
+//        let tree = try Markdown(text: input).parse()
+//        let paragraph = tree.children.first as? Paragraph
+//        let link = paragraph?.children[1] as? Link
+//        let range = input.range(0...18)
+//
+//        // then
+//        XCTAssertEqual(link?.position.range, range)
+//        XCTAssertEqual(input[range], "https://example.com")
+//    }
 
     func testLinkWithEmptyChildRange() throws {
         // given
