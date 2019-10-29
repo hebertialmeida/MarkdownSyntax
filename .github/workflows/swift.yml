@@ -5,11 +5,10 @@ on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: macOS-latest
-
     steps:
     - uses: actions/checkout@v1
+    - name: Setup Swift
     - uses: YOCKOW/Action-setup-swift@master
       with:
         swift-version: '5.1'
