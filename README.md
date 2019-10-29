@@ -1,5 +1,7 @@
 # MarkdownSyntax
 
+![](https://github.com/hebertialmeida/MarkdownSyntax/workflows/Swift/badge.svg)
+
 Markdown Syntax Highlighting and AST implemented in Swift.
 
 ### Acknowledgements
