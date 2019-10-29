@@ -8,7 +8,7 @@ final class ParserTests: XCTestCase {
         let input = "Line 1\nLine 2\rLine 3\r\nLine 4"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
 
         // then
         XCTAssertEqual(input.lineOffsets.count, 4)

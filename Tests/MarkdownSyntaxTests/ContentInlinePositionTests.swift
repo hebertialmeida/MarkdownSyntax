@@ -8,7 +8,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = #"[alpha](https://example.com "bravo")"#
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let range = input.range(0...35)
@@ -23,7 +23,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "https://example.com"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children[1] as? Link
         let range = input.range(0...18)
@@ -38,7 +38,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "[](https://example.com)"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let range = input.range(0...22)
@@ -53,7 +53,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "[Page 52](#some-topic)"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let range = input.range(0...21)
@@ -68,7 +68,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = #"![alpha](https://example.com/favicon.ico "bravo")"#
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let image = paragraph?.children.first as? Image
         let range = input.range(0...48)
@@ -83,7 +83,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "~~alpha~~"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let delete = paragraph?.children.first as? Delete
         let range = input.range(0...8)
@@ -98,7 +98,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "**alpha**"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Strong
         let range = input.range(0...8)
@@ -113,7 +113,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "__alpha__"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Strong
         let range = input.range(0...8)
@@ -128,7 +128,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "*alpha*"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Emphasis
         let range = input.range(0...6)
@@ -143,7 +143,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "_alpha_"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Emphasis
         let range = input.range(0...6)
@@ -158,7 +158,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "`alpha`"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? InlineCode
         let range = input.range(0...6)
@@ -173,7 +173,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "```alpha```"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? InlineCode
         let range = input.range(0...10)
@@ -188,7 +188,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "foo\nbar"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let softBreak = paragraph?.children[1] as? SoftBreak
 
@@ -205,7 +205,7 @@ final class ContentInlinePositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let lineBreak = paragraph?.children[1] as? Break
 
@@ -224,7 +224,7 @@ final class ContentInlinePositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children[1] as? FootnoteReference
         let node2 = paragraph?.children[3] as? FootnoteReference
@@ -243,7 +243,7 @@ final class ContentInlinePositionTests: XCTestCase {
         let input = "<del>*foo*</del>"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let tag1 = paragraph?.children[0] as? HTML
         let tag2 = paragraph?.children[2] as? HTML

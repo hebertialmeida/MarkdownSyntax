@@ -8,7 +8,7 @@ final class ParserInlineTests: XCTestCase {
         let input = #"[alpha](https://example.com "bravo")"#
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let linkText = link?.children.first as? Text
@@ -25,7 +25,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "https://example.com"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let text = paragraph?.children[0] as? Text
         let link = paragraph?.children[1] as? Link
@@ -44,7 +44,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "[](https://example.com)"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
 
@@ -60,7 +60,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "[Page 52](#some-topic)"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let linkText = link?.children.first as? Text
@@ -77,7 +77,7 @@ final class ParserInlineTests: XCTestCase {
         let input = #"![alpha](https://example.com/favicon.ico "bravo")"#
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let image = paragraph?.children.first as? Image
 
@@ -93,7 +93,7 @@ final class ParserInlineTests: XCTestCase {
         let input = #"![foo [bar](/url)](https://example.com/favicon.ico "bravo")"#
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let image = paragraph?.children.first as? Image
         let link = image?.children[1] as? Link
@@ -113,7 +113,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "~~alpha~~"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let delete = paragraph?.children.first as? Delete
         let deleteText = delete?.children.first as? Text
@@ -128,7 +128,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "**alpha**"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Strong
         let text = node?.children.first as? Text
@@ -143,7 +143,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "__alpha__"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Strong
         let text = node?.children.first as? Text
@@ -158,7 +158,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "*alpha*"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Emphasis
         let text = node?.children.first as? Text
@@ -173,7 +173,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "_alpha_"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Emphasis
         let text = node?.children.first as? Text
@@ -188,7 +188,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "`alpha`"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? InlineCode
         let text = node?.value
@@ -203,7 +203,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "foo\nbar"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
 
         // then
@@ -222,7 +222,7 @@ final class ParserInlineTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
 
         // then
         XCTAssertNotNil(tree.children[0] as? Paragraph)
@@ -238,7 +238,7 @@ final class ParserInlineTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
 
         // then
@@ -258,7 +258,7 @@ final class ParserInlineTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children[1] as? FootnoteReference
         let node2 = paragraph?.children[3] as? FootnoteReference
@@ -277,7 +277,7 @@ final class ParserInlineTests: XCTestCase {
         let input = "<del>*foo*</del>"
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let tag1 = paragraph?.children[0] as? HTML
         let emphasis = paragraph?.children[1] as? Emphasis

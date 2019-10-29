@@ -1,13 +1,13 @@
 //
-//  Parser.swift
+//  Markdown.swift
 //  MarkdownSyntax
 //
 //  Created by Heberti Almeida on 2019-10-18.
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
-/// Represents a way of converting a CMDocument to a Document
-public class Parser {
+/// Markdown parser
+public class Markdown {
 
     /// The current footnote index.
     private var footnoteIndex: Int = 0
@@ -16,29 +16,27 @@ public class Parser {
 
     private var text = ""
 
-    /// Creates a document converter.
-    ///
-    /// - Returns:
-    ///     The initialized converter.
-    public init() {}
+    /// The root node of the document.
+    public var document: CMDocument
 
-    /// Parses a markdown document to a Swift AST.
+    // MARK: Init
+
+    /// Init a parser.
     ///
     /// - Parameters:
     ///     - text: The input string.
     ///     - startingFootnoteIndex: The index footnote should start.
+    ///     - options: The document options.
+    ///     - extensions: gfm extensions to enable.
     /// - Throws:
-    ///     `CMParseError.invalidEventType` if an invalid event type is encountered.
+    ///     `CMDocumentError.parsingError` if an invalid event type is encountered.
     /// - Returns:
-    ///     A Swift AST (Abstract Syntax Tree).
-    public func parse(text: String, startingFootnoteIndex: Int = 0) throws -> Root {
+    ///     The initialized parser.
+    public init(text: String, startingFootnoteIndex: Int = 0, options: CMDocumentOption = [.sourcepos, .strikethroughDoubleTilde, .footnotes], extensions: CMExtensionOption = [.all]) throws {
         self.text = text
         self.footnoteIndex = startingFootnoteIndex
         self.lineOffsets = text.lineOffsets
-
-        let node = try CMDocument(text: text, options: [.sourcepos, .strikethroughDoubleTilde, .footnotes], extensions: [.all]).node
-        let items = parseContent(node.children)
-        return Root(children: items, position: position(for: node))
+        self.document = try CMDocument(text: text, options: options, extensions: extensions)
     }
 
     // MARK: Internal parsing

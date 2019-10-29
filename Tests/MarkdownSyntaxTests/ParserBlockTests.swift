@@ -16,7 +16,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let heading1 = tree.children[0] as? Heading
         let text1 = heading1?.children.first as? Text
         let heading2 = tree.children[1] as? Heading
@@ -57,7 +57,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let definition = tree.children[1] as? FootnoteDefinition
         let paragraph = definition?.children.first as? Paragraph
         let text = paragraph?.children.first as? Text
@@ -84,7 +84,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let blockquote = tree.children.first as? Blockquote
         let paragraph = blockquote?.children.first as? Paragraph
         let text = paragraph?.children.first as? Text
@@ -108,7 +108,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let thematicBreak = tree.children[1] as? ThematicBreak
 
         // then
@@ -127,7 +127,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let code = tree.children.first as? Code
 
         // then
@@ -147,7 +147,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let code = tree.children.first as? HTML
 
         // then
@@ -167,7 +167,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = list?.children[1] as? ListItem
@@ -205,7 +205,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = list?.children[1] as? ListItem
@@ -244,7 +244,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = list?.children[1] as? ListItem
@@ -290,7 +290,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = list?.children[1] as? ListItem
@@ -326,7 +326,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = (first?.children[1] as? List)?.children.first as? ListItem
@@ -366,7 +366,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = (first?.children[1] as? List)?.children.first as? ListItem
@@ -404,7 +404,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let table = tree.children.first as? Table
         let row0 = table?.children[0] as? TableRow
         let row1 = table?.children[1] as? TableRow

@@ -13,7 +13,7 @@ final class ContentBlockPositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let heading1 = tree.children[0] as? Heading
         let headingStrong = heading1?.children[1] as? Strong
 
@@ -39,7 +39,7 @@ final class ContentBlockPositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children[1] as? Paragraph
         let paragraphStrong = paragraph?.children[1] as? Strong
         let paragraphEmphasis = paragraphStrong?.children[1] as? Emphasis
@@ -76,7 +76,7 @@ final class ContentBlockPositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Parser().parse(text: input)
+        let tree = try Markdown(text: input).parse()
         let paragraph = tree.children[2] as? Paragraph
         let inlineCode = paragraph?.children[1] as? InlineCode
 
