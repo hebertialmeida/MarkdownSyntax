@@ -168,6 +168,21 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "`alpha`")
     }
 
+    func testInlineCodeRangeMultiBackticks() throws {
+        // given
+        let input = "```alpha```"
+
+        // when
+        let tree = try Parser().parse(text: input)
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children.first as? InlineCode
+        let range = input.range(0...10)
+
+        // then
+        XCTAssertEqual(node?.position.range, range)
+        XCTAssertEqual(input[range], "```alpha```")
+    }
+
     func testSoftBreakRange() throws {
         // given
         let input = "foo\nbar"
