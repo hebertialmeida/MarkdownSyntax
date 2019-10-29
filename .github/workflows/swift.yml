@@ -1,5 +1,6 @@
 name: Swift
 
+
 on: [push, pull_request]
 
 jobs:
@@ -9,7 +10,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Build
-      run: swift build -v
+    - uses: YOCKOW/Action-setup-swift@master
+      with:
+        swift-version: '5.1'
     - name: Run tests
       run: swift test -v
