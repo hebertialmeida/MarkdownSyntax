@@ -7,7 +7,7 @@
 //
 
 import struct Foundation.Data
-import libcmark_gfm
+import cmark_gfm
 
 /// Represents a cmark document error.
 public enum CMDocumentError: Error {

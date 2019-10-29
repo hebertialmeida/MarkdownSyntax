@@ -8,10 +8,10 @@ let package = Package(
         .library(name: "MarkdownSyntax", targets: ["MarkdownSyntax"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/KristopherGBaker/libcmark_gfm.git", from: "0.29.3"),
+        .package(url: "https://github.com/hebertialmeida/swift-cmark-gfm.git", .branch("master"))
     ],
     targets: [
-        .target(name: "MarkdownSyntax", dependencies: ["libcmark_gfm"]),
+        .target(name: "MarkdownSyntax", dependencies: ["cmark_gfm"]),
         .testTarget(name: "MarkdownSyntaxTests", dependencies: ["MarkdownSyntax"]),
     ]
 )

@@ -7,7 +7,7 @@
 //
 
 import struct Foundation.URL
-import libcmark_gfm
+import cmark_gfm
 
 /// Represents a cmark node.
 public class CMNode {

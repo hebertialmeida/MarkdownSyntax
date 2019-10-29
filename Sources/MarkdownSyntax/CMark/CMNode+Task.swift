@@ -6,7 +6,7 @@
 //  Copyright © 2019 Kristopher Baker. All rights reserved.
 //
 
-import libcmark_gfm
+import cmark_gfm
 
 /// Extension properties for tasklist items
 public extension CMNode {

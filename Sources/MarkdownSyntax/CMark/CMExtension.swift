@@ -6,7 +6,7 @@
 //  Copyright © 2017 Kristopher Baker. All rights reserved.
 //
 
-import libcmark_gfm
+import cmark_gfm
 
 /// cmark gfm extension names
 enum CMExtensionName: String {

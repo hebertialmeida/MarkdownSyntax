@@ -6,7 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
-import libcmark_gfm
+import cmark_gfm
 
 extension CMNode {
     func getTableAlignments() -> [AlignType] {

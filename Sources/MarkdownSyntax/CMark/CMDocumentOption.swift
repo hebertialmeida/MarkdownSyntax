@@ -6,7 +6,7 @@
 //  Copyright © 2017 Kristopher Baker. All rights reserved.
 //
 
-import libcmark_gfm
+import cmark_gfm
 
 /// Represents a cmark document option.
 public struct CMDocumentOption: OptionSet {
