@@ -1,6 +1,6 @@
 # MarkdownSyntax
 
-Markdown Syntax Highlighting and AST implemented Swift backed by [cmark](https://github.com/commonmark/cmark).
+Markdown Syntax Highlighting and AST implemented in Swift.
 
 ### Acknowledgements
 
