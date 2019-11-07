@@ -29,7 +29,7 @@ extension CMNode {
             return Position(start: startPoint, end: endPoint, indent: nil)
         }
 
-        guard startColumn > 0 && startLine > 0 else { return failEarly() }
+        guard startColumn > 0 && startLine > 0, text.startIndex != text.endIndex else { return failEarly() }
         let start = index(of: startPoint)
         let end = index(of: endPoint)
 
