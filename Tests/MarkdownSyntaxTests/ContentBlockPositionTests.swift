@@ -86,4 +86,56 @@ final class ContentBlockPositionTests: XCTestCase {
         XCTAssertEqual(inlineCode?.position.range, inlineCodeRange)
         XCTAssertEqual(input[inlineCodeRange], "`alpha-inline`")
     }
+
+    func testBlockquotePosition() throws {
+        // given
+        let input =
+        """
+        > Alpha bravo charlie.
+        > This is the second line.
+        """
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let blockquote = tree.children.first as? Blockquote
+        let paragraph = blockquote?.children.first as? Paragraph
+        let text = paragraph?.children.first as? Text
+        let softBreak = paragraph?.children[1] as? SoftBreak
+        let text2 = paragraph?.children[2] as? Text
+
+        let textRange = input.range(2...21)
+        let textRange2 = input.range(25...48)
+
+        // then
+        XCTAssertEqual(blockquote?.type, .blockquote)
+        XCTAssertEqual(softBreak?.type, .softBreak)
+        XCTAssertEqual(text?.position.range, textRange)
+        XCTAssertEqual(text2?.position.range, textRange2)
+    }
+
+    func testFootnoteDefinitionPosition() throws {
+        // given
+        let input =
+        """
+        Here is a footnote reference,[^1] and another.[^longnote] and some more [^alpha bravo]
+
+        [^1]: Here is the footnote.
+        [^longnote]: Here's one with multiple blocks.
+        """
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let node = tree.children[1] as? FootnoteDefinition
+        let node2 = tree.children[2] as? FootnoteDefinition
+        let range = input.range(88...92)
+        let range2 = input.range(116...127)
+
+        // then
+//        XCTAssertEqual(node?.position.range, range)
+        XCTAssertEqual(input[node!.position.range!], "[^1]: Here is the footnote.")
+        XCTAssertEqual(input[range], "[^1]:")
+//        XCTAssertEqual(node2?.position.range, range2)
+        XCTAssertEqual(input[node2!.position.range!], "[^longnote]: Here's one with multiple blocks.")
+        XCTAssertEqual(input[range2], "[^longnote]:")
+    }
 }
