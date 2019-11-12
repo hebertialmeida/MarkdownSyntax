@@ -19,6 +19,33 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(link?.title, "bravo")
         XCTAssertEqual(linkText?.value, "alpha")
     }
+
+    // Fixes https://github.com/commonmark/commonmark.js/issues/177
+    func testInvalidLink() throws {
+        // given
+        let input = """
+        [link](/u(ri )
+        [link](/u(ri
+        )
+        """
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let paragraph = tree.children.first as? Paragraph
+        let child0 = paragraph?.children[0] as? Text
+        let child1 = paragraph?.children[1] as? SoftBreak
+        let child2 = paragraph?.children[2] as? Text
+        let child3 = paragraph?.children[3] as? SoftBreak
+        let child4 = paragraph?.children[4] as? Text
+
+        // then
+        XCTAssertEqual(paragraph?.children.count, 5)
+        XCTAssertEqual(child0?.type, .text)
+        XCTAssertEqual(child1?.type, .softBreak)
+        XCTAssertEqual(child2?.type, .text)
+        XCTAssertEqual(child3?.type, .softBreak)
+        XCTAssertEqual(child4?.type, .text)
+    }
     
     func testAutoLink() throws {
         // given
