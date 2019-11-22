@@ -138,4 +138,33 @@ final class ContentBlockPositionTests: XCTestCase {
         XCTAssertEqual(input[node2!.position.range!], "[^longnote]: Here's one with multiple blocks.")
         XCTAssertEqual(input[range2], "[^longnote]:")
     }
+
+    func testHTMLPosition() throws {
+        // given
+        let input = "<div>this</div>"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let node = tree.children.first as? HTML
+        let range = input.range(0...15)
+
+        // then
+        XCTAssertEqual(input[node!.position.range!], "<div>this</div>")
+        XCTAssertEqual(input[range], "<div>this</div>")
+    }
+
+    // Because html comment is a inline element seems that the behaviour is weird, double check this later
+    func testHTMLCommentPosition() throws {
+        // given
+        let input = "<!-- this -->\n"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let node = tree.children.first as? HTML
+        let range = input.range(0...13)
+
+        // then
+        XCTAssertEqual(input[node!.position.range!], "<!-- this -->")
+        XCTAssertEqual(input[range], "<!-- this -->\n")
+    }
 }

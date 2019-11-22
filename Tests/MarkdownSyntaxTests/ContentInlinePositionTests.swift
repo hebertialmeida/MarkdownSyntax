@@ -18,20 +18,20 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], #"[alpha](https://example.com "bravo")"#)
     }
 
-//    func testAutoLinkRange() throws {
-//        // given
-//        let input = "https://example.com"
-//
-//        // when
-//        let tree = try Markdown(text: input).parse()
-//        let paragraph = tree.children.first as? Paragraph
-//        let link = paragraph?.children[1] as? Link
-//        let range = input.range(0...18)
-//
-//        // then
-//        XCTAssertEqual(link?.position.range, range)
-//        XCTAssertEqual(input[range], "https://example.com")
-//    }
+    func testAutoLinkRange() throws {
+        // given
+        let input = "https://example.com"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let paragraph = tree.children.first as? Paragraph
+        let link = paragraph?.children[1] as? Link
+        let range = input.range(0...18)
+
+        // then
+        XCTAssertEqual(link?.position.range, range)
+        XCTAssertEqual(input[range], "https://example.com")
+    }
 
     func testLinkWithEmptyChildRange() throws {
         // given
@@ -191,9 +191,10 @@ final class ContentInlinePositionTests: XCTestCase {
         let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let softBreak = paragraph?.children[1] as? SoftBreak
+        let range = input.range(0...0) // Cmark don't return any position for SoftBreak
 
         // then
-        XCTAssertNil(softBreak?.position.range) // Cmark don't return any position for SoftBreak
+        XCTAssertEqual(softBreak?.position.range, range)
     }
 
     func testSpaceLineBreakRange() throws {
@@ -246,14 +247,33 @@ final class ContentInlinePositionTests: XCTestCase {
         let tree = try Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let tag1 = paragraph?.children[0] as? HTML
+        let em = paragraph?.children[1] as? Emphasis
         let tag2 = paragraph?.children[2] as? HTML
         let range = input.range(0...4)
+        let emRange = input.range(5...9)
         let range2 = input.range(10...15)
 
         // then
         XCTAssertEqual(tag1?.position.range, range)
         XCTAssertEqual(input[range], "<del>")
+        XCTAssertEqual(em?.position.range, emRange)
+        XCTAssertEqual(input[emRange], "*foo*")
         XCTAssertEqual(tag2?.position.range, range2)
         XCTAssertEqual(input[range2], "</del>")
+    }
+
+    func testHTMLInlineCommentPosition() throws {
+        // given
+        let input = "This is some <!-- this --> bla bla bla"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let paragraph = tree.children.first as? Paragraph
+        let node = paragraph?.children[1] as? HTML
+        let range = input.range(13...25)
+
+        // then
+        XCTAssertEqual(input[node!.position.range!], "<!-- this -->")
+        XCTAssertEqual(input[range], "<!-- this -->")
     }
 }

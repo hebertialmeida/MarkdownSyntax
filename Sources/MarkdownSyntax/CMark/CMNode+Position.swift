@@ -18,8 +18,9 @@ extension CMNode {
         var endPoint = Point(line: endLine, column: endColumn, offset: nil)
 
         func index(of point: Point) -> String.Index {
-            let lineStart = lineOffsets[point.line-1]
-            let offset = point.column-1
+            let line = point.line > 0 ? point.line-1 : point.line
+            let lineStart = lineOffsets[line]
+            let offset = point.column > 0 ? point.column-1 : point.column
             // We don't use endIndex but the index before, because we use it in a closed range
             let lastValidIndex = text.index(before: text.endIndex)
             return text.utf8.index(lineStart, offsetBy: offset, limitedBy: lastValidIndex) ?? lastValidIndex
@@ -29,7 +30,10 @@ extension CMNode {
             return Position(start: startPoint, end: endPoint, indent: nil)
         }
 
-        guard startColumn > 0 && startLine > 0, text.startIndex != text.endIndex else { return failEarly() }
+        guard text.startIndex != text.endIndex else {
+            return failEarly()
+        }
+
         let start = index(of: startPoint)
         let end = index(of: endPoint)
 

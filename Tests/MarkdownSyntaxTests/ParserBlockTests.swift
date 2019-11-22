@@ -155,6 +155,19 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(code?.value, "<div id=\"foo\"\n  class=\"bar\">\n</div>\n")
     }
 
+    func testHTMLComment() throws {
+        // given
+        let input = "<!-- this -->\n"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let code = tree.children.first as? HTML
+
+        // then
+        XCTAssertEqual(code?.type, .html)
+        XCTAssertEqual(code?.value, "<!-- this -->\n")
+    }
+
     // MARK: - List
 
     func testList() throws {
