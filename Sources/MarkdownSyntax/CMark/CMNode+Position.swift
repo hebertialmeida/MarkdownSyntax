@@ -30,7 +30,10 @@ extension CMNode {
             return Position(start: startPoint, end: endPoint, indent: nil)
         }
 
-        guard text.startIndex != text.endIndex else {
+        guard
+            startColumn > 0 && startLine > 0,
+            text.startIndex != text.endIndex
+        else {
             return failEarly()
         }
 
