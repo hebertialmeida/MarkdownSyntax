@@ -87,6 +87,28 @@ final class ContentBlockPositionTests: XCTestCase {
         XCTAssertEqual(input[inlineCodeRange], "`alpha-inline`")
     }
 
+    func testCodeBlockPosition() throws {
+        // given
+        let input =
+        """
+        ```swift
+        func some() {
+            print("code")
+        }
+        ```
+        """
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let code = tree.children.first as? Code
+        let codeRange = input.range(0...45)
+
+        // then
+        XCTAssertEqual(code?.type, .code)
+        XCTAssertEqual(code?.position.range, codeRange)
+        XCTAssertEqual(tree.position.range, codeRange)
+    }
+
     func testBlockquotePosition() throws {
         // given
         let input =
@@ -154,17 +176,17 @@ final class ContentBlockPositionTests: XCTestCase {
     }
 
     // Because html comment is a inline element seems that the behaviour is weird, double check this later
-//    func testHTMLCommentPosition() throws {
-//        // given
-//        let input = "<!-- this -->\n"
-//
-//        // when
-//        let tree = try Markdown(text: input).parse()
-//        let node = tree.children.first as? HTML
-//        let range = input.range(0...13)
-//
-//        // then
-//        XCTAssertEqual(input[node!.position.range!], "<!-- this -->")
-//        XCTAssertEqual(input[range], "<!-- this -->\n")
-//    }
+    func testHTMLCommentPosition() throws {
+        // given
+        let input = "<!-- this -->\n"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let node = tree.children.first as? HTML
+        let range = input.range(0...13)
+
+        // then
+        XCTAssertEqual(input[node!.position.range!], "<!-- this -->")
+        XCTAssertEqual(input[range], "<!-- this -->\n")
+    }
 }

@@ -6,7 +6,12 @@ extension ContentBlockPositionTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__ContentBlockPositionTests = [
+        ("testBlockquotePosition", testBlockquotePosition),
+        ("testCodeBlockPosition", testCodeBlockPosition),
+        ("testFootnoteDefinitionPosition", testFootnoteDefinitionPosition),
         ("testHeadingWithInline", testHeadingWithInline),
+        ("testHTMLCommentPosition", testHTMLCommentPosition),
+        ("testHTMLPosition", testHTMLPosition),
         ("testParagraphWithInline", testParagraphWithInline),
         ("testParagraphWithInlineCode", testParagraphWithInlineCode),
     ]
@@ -17,9 +22,11 @@ extension ContentInlinePositionTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__ContentInlinePositionTests = [
+        ("testAutoLinkRange", testAutoLinkRange),
         ("testEmphasisRange", testEmphasisRange),
         ("testEmphasisUnderscoreRange", testEmphasisUnderscoreRange),
         ("testFootnoteReferenceRange", testFootnoteReferenceRange),
+        ("testHTMLInlineCommentPosition", testHTMLInlineCommentPosition),
         ("testHTMLInlineRange", testHTMLInlineRange),
         ("testImageRange", testImageRange),
         ("testInlineCodeRange", testInlineCodeRange),
@@ -45,6 +52,7 @@ extension ParserBlockTests {
         ("testFootnoteDefinition", testFootnoteDefinition),
         ("testHeading", testHeading),
         ("testHTML", testHTML),
+        ("testHTMLComment", testHTMLComment),
         ("testList", testList),
         ("testListHierarchy", testListHierarchy),
         ("testListHierarchySpread", testListHierarchySpread),
@@ -70,6 +78,7 @@ extension ParserInlineTests {
         ("testImageWithLinkInsideAlt", testImageWithLinkInsideAlt),
         ("testInlineCode", testInlineCode),
         ("testInternalLink", testInternalLink),
+        ("testInvalidLink", testInvalidLink),
         ("testLineBreak", testLineBreak),
         ("testLink", testLink),
         ("testLinkWithEmptyChildTitle", testLinkWithEmptyChildTitle),
