@@ -1,6 +1,7 @@
 # MarkdownSyntax
 
 ![](https://github.com/hebertialmeida/MarkdownSyntax/workflows/Swift/badge.svg)
+[![codecov](https://codecov.io/gh/hebertialmeida/MarkdownSyntax/branch/master/graph/badge.svg)](https://codecov.io/gh/hebertialmeida/MarkdownSyntax)
 
 Markdown Syntax Highlighting and AST implemented in Swift.
 
