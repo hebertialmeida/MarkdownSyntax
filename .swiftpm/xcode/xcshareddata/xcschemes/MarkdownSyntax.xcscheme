@@ -56,9 +56,6 @@
                <Test
                   Identifier = "ContentBlockPositionTests/testHTMLCommentPosition()">
                </Test>
-               <Test
-                  Identifier = "ContentInlinePositionTests/testAutoLinkRange()">
-               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>

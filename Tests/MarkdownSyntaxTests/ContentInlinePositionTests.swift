@@ -18,21 +18,83 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], #"[alpha](https://example.com "bravo")"#)
     }
 
-    // The position is wrong, investigate why.
+    // MARK: GFM autolink
+
     func testAutoLinkRange() throws {
         // given
-        let input = "https://example.com"
+        let input = "testing http://www.example.com is a autolink"
 
         // when
         let tree = try Markdown(text: input).parse()
-        debugPrint(tree)
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children[1] as? Link
-        let range = input.range(0...18)
+        let range = input.range(8...29)
 
         // then
         XCTAssertEqual(link?.position.range, range)
-        XCTAssertEqual(input[range], "https://example.com")
+        XCTAssertEqual(input[range], "http://www.example.com")
+    }
+
+    func testAutoLinkHttpsRange() throws {
+        // given
+        let input = "testing https://www.example.com is a autolink"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let paragraph = tree.children.first as? Paragraph
+        let link = paragraph?.children[1] as? Link
+        let range = input.range(8...30)
+
+        // then
+        XCTAssertEqual(link?.position.range, range)
+        XCTAssertEqual(input[range], "https://www.example.com")
+    }
+
+    func testAutoLinkFtpRange() throws {
+        // given
+        let input = "testing ftp://www.example.com is a autolink"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let paragraph = tree.children.first as? Paragraph
+        let link = paragraph?.children[1] as? Link
+        let range = input.range(8...28)
+
+        // then
+        XCTAssertEqual(link?.position.range, range)
+        XCTAssertEqual(input[range], "ftp://www.example.com")
+    }
+
+    func testWwwAutoLinkRange() throws {
+        // given
+        let input = "testing www.example.com is a autolink"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let paragraph = tree.children.first as? Paragraph
+        let link = paragraph?.children[1] as? Link
+        let range = input.range(8...22)
+
+        // then
+        XCTAssertEqual(link?.position.range, range)
+        XCTAssertEqual(input[range], "www.example.com")
+    }
+
+    // MARK: Native cmark autolink
+
+    func testAutoLinkBracesRange() throws {
+        // given
+        let input = "<https://example.com>"
+
+        // when
+        let tree = try Markdown(text: input).parse()
+        let paragraph = tree.children.first as? Paragraph
+        let link = paragraph?.children.first as? Link
+        let range = input.range(0...20)
+
+        // then
+        XCTAssertEqual(link?.position.range, range)
+        XCTAssertEqual(input[range], "<https://example.com>")
     }
 
     func testLinkWithEmptyChildRange() throws {
