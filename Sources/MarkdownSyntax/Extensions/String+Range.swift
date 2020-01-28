@@ -7,9 +7,6 @@
 //
 
 extension String {
-//    subscript (bounds: CountableClosedRange<Int>) -> Substring {
-//        return self[range(bounds)]
-//    }
 
     /// Helper function for creating `ClosedRange<String.Index>` from `Int` range
     /// - Parameter bounds: Closed range eg. `0...5`
