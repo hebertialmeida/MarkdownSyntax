@@ -19,41 +19,41 @@ Root(
     type: .root, 
     children: [
         Paragraph(
-        type: .paragraph, 
-        children: [
-            Text(
-                type: .text, 
-                value: "Hi this is ", 
-                position: Position(
-                    start: Point(line: 1, column: 1, offset: 0), 
-                    end: Point(line: 1, column: 11, offset: 10), 
-                    indent: nil
-                )
-            ), 
-            Strong(
-                type: .strong, 
-                children: [
-                    Text(
-                        type: .text, 
-                        value: "alpha", 
-                        position: Position(
-                            start: Point(line: 1, column: 14, offset: 13), 
-                            end: Point(line: 1, column: 18, offset: 17), 
-                            indent: nil
-                        )
+            type: .paragraph, 
+            children: [
+                Text(
+                    type: .text, 
+                    value: "Hi this is ", 
+                    position: Position(
+                        start: Point(line: 1, column: 1, offset: 0), 
+                        end: Point(line: 1, column: 11, offset: 10), 
+                        indent: nil
                     )
-                ], 
-                position: Position(
-                    start: Point(line: 1, column: 12, offset: 11), 
-                    end: MarkdownSyntax.Point(line: 1, column: 20, offset: 19), 
-                    indent: nil
+                ), 
+                Strong(
+                    type: .strong, 
+                    children: [
+                        Text(
+                            type: .text, 
+                            value: "alpha", 
+                            position: Position(
+                                start: Point(line: 1, column: 14, offset: 13), 
+                                end: Point(line: 1, column: 18, offset: 17), 
+                                indent: nil
+                            )
+                        )
+                    ], 
+                    position: Position(
+                        start: Point(line: 1, column: 12, offset: 11), 
+                        end: MarkdownSyntax.Point(line: 1, column: 20, offset: 19), 
+                        indent: nil
+                    )
                 )
-            )
-        ], 
-        position: Position(
-            start: Point(line: 1, column: 1, offset: 0), 
-            end: Point(line: 1, column: 20, offset: 19), 
-            indent: nil)
+            ], 
+            position: Position(
+                start: Point(line: 1, column: 1, offset: 0), 
+                end: Point(line: 1, column: 20, offset: 19), 
+                indent: nil)
         )
     ], 
     position: Position(
