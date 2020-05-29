@@ -16,13 +16,10 @@ Outputs a normalized tree:
 
 ```swift
 Root(
-    type: .root, 
     children: [
         Paragraph(
-            type: .paragraph, 
             children: [
                 Text(
-                    type: .text, 
                     value: "Hi this is ", 
                     position: Position(
                         start: Point(line: 1, column: 1, offset: 0), 
@@ -31,10 +28,8 @@ Root(
                     )
                 ), 
                 Strong(
-                    type: .strong, 
                     children: [
                         Text(
-                            type: .text, 
                             value: "alpha", 
                             position: Position(
                                 start: Point(line: 1, column: 14, offset: 13), 
