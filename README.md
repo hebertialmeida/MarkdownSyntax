@@ -48,7 +48,8 @@ Root(
             position: Position(
                 start: Point(line: 1, column: 1, offset: 0), 
                 end: Point(line: 1, column: 20, offset: 19), 
-                indent: nil)
+                indent: nil
+            )
         )
     ], 
     position: Position(
