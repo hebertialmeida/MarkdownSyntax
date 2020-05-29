@@ -7,7 +7,6 @@
 //
 
 public struct Table: BlockContent, Parent {
-    public let type: NodeType = .table
     public let align: [AlignType]?
     public let children: [TableContent]
     public let position: Position

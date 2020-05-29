@@ -7,7 +7,6 @@
 //
 
 public struct Blockquote: BlockContent, Parent {
-    public let type: NodeType = .blockquote
     public let children: [BlockContent]
     public let position: Position
 

@@ -7,7 +7,6 @@
 //
 
 public struct List: BlockContent, Parent {
-    public let type: NodeType = .list
     public let ordered: Bool
     public let start: Int?
     public let spread: Bool?

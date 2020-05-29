@@ -7,7 +7,6 @@
 //
 
 public struct Text: StaticPhrasingContent, PhrasingContent, Literal {
-    public let type: NodeType = .text
     public let value: String
     public let position: Position
 

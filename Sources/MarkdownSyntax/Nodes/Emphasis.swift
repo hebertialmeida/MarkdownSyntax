@@ -7,7 +7,6 @@
 //
 
 public struct Emphasis: StaticPhrasingContent, PhrasingContent, Parent {
-    public let type: NodeType = .emphasis
     public let children: [PhrasingContent]
     public let position: Position
 

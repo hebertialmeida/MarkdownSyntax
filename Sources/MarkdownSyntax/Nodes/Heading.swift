@@ -7,7 +7,6 @@
 //
 
 public struct Heading: BlockContent, Parent {
-    public let type: NodeType = .heading
     public let children: [PhrasingContent]
     public let depth: Depth
     public let position: Position

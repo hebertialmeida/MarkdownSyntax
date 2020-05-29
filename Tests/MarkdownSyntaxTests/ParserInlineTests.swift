@@ -14,7 +14,6 @@ final class ParserInlineTests: XCTestCase {
         let linkText = link?.children.first as? Text
 
         // then
-        XCTAssertEqual(link?.type, .link)
         XCTAssertEqual(link?.url.absoluteString, "https://example.com")
         XCTAssertEqual(link?.title, "bravo")
         XCTAssertEqual(linkText?.value, "alpha")
@@ -40,11 +39,11 @@ final class ParserInlineTests: XCTestCase {
 
         // then
         XCTAssertEqual(paragraph?.children.count, 5)
-        XCTAssertEqual(child0?.type, .text)
-        XCTAssertEqual(child1?.type, .softBreak)
-        XCTAssertEqual(child2?.type, .text)
-        XCTAssertEqual(child3?.type, .softBreak)
-        XCTAssertEqual(child4?.type, .text)
+        XCTAssertNotNil(child0)
+        XCTAssertNotNil(child1)
+        XCTAssertNotNil(child2)
+        XCTAssertNotNil(child3)
+        XCTAssertNotNil(child4)
     }
     
     func testAutoLink() throws {
@@ -60,7 +59,6 @@ final class ParserInlineTests: XCTestCase {
 
         // then
         XCTAssertEqual(text?.value, "")
-        XCTAssertEqual(link?.type, .link)
         XCTAssertEqual(link?.url.absoluteString, "https://example.com")
         XCTAssertEqual(link?.title, "")
         XCTAssertEqual(linkText?.value, "https://example.com")
@@ -76,7 +74,6 @@ final class ParserInlineTests: XCTestCase {
         let link = paragraph?.children.first as? Link
 
         // then
-        XCTAssertEqual(link?.type, .link)
         XCTAssertEqual(link?.url.absoluteString, "https://example.com")
         XCTAssertEqual(link?.title, "")
         XCTAssertEqual(link?.children.count, 0)
@@ -93,7 +90,6 @@ final class ParserInlineTests: XCTestCase {
         let linkText = link?.children.first as? Text
 
         // then
-        XCTAssertEqual(link?.type, .link)
         XCTAssertEqual(link?.url.absoluteString, "#some-topic")
         XCTAssertEqual(link?.title, "")
         XCTAssertEqual(linkText?.value, "Page 52")
@@ -109,7 +105,6 @@ final class ParserInlineTests: XCTestCase {
         let image = paragraph?.children.first as? Image
 
         // then
-        XCTAssertEqual(image?.type, .image)
         XCTAssertEqual(image?.url.absoluteString, "https://example.com/favicon.ico")
         XCTAssertEqual(image?.title, "bravo")
         XCTAssertEqual(image?.alt, "alpha")
@@ -127,7 +122,6 @@ final class ParserInlineTests: XCTestCase {
         let linkText = link?.children.first as? Text
 
         // then
-        XCTAssertEqual(image?.type, .image)
         XCTAssertEqual(image?.url.absoluteString, "https://example.com/favicon.ico")
         XCTAssertEqual(image?.title, "bravo")
         XCTAssertEqual(image?.alt, "foo bar")
@@ -146,7 +140,6 @@ final class ParserInlineTests: XCTestCase {
         let deleteText = delete?.children.first as? Text
 
         // then
-        XCTAssertEqual(delete?.type, .delete)
         XCTAssertEqual(deleteText?.value, "alpha")
     }
 
@@ -161,7 +154,6 @@ final class ParserInlineTests: XCTestCase {
         let text = node?.children.first as? Text
 
         // then
-        XCTAssertEqual(node?.type, .strong)
         XCTAssertEqual(text?.value, "alpha")
     }
 
@@ -176,7 +168,6 @@ final class ParserInlineTests: XCTestCase {
         let text = node?.children.first as? Text
 
         // then
-        XCTAssertEqual(node?.type, .strong)
         XCTAssertEqual(text?.value, "alpha")
     }
 
@@ -191,7 +182,6 @@ final class ParserInlineTests: XCTestCase {
         let text = node?.children.first as? Text
 
         // then
-        XCTAssertEqual(node?.type, .emphasis)
         XCTAssertEqual(text?.value, "alpha")
     }
 
@@ -206,7 +196,6 @@ final class ParserInlineTests: XCTestCase {
         let text = node?.children.first as? Text
 
         // then
-        XCTAssertEqual(node?.type, .emphasis)
         XCTAssertEqual(text?.value, "alpha")
     }
 
@@ -221,7 +210,6 @@ final class ParserInlineTests: XCTestCase {
         let text = node?.value
 
         // then
-        XCTAssertEqual(node?.type, .inlineCode)
         XCTAssertEqual(text, "alpha")
     }
 
@@ -291,8 +279,6 @@ final class ParserInlineTests: XCTestCase {
         let node2 = paragraph?.children[3] as? FootnoteReference
 
         // then
-        XCTAssertEqual(node?.type, .footnoteReference)
-        XCTAssertEqual(node2?.type, .footnoteReference)
         XCTAssertEqual(node?.identifier, "1")
         XCTAssertEqual(node?.label, "1")
         XCTAssertEqual(node2?.identifier, "2")
@@ -311,13 +297,8 @@ final class ParserInlineTests: XCTestCase {
         let tag2 = paragraph?.children[2] as? HTML
 
         // then
-        XCTAssertEqual(tag1?.type, .html)
         XCTAssertEqual(tag1?.value, "<del>")
-
-        XCTAssertEqual(emphasis?.type, .emphasis)
         XCTAssertEqual((emphasis?.children.first as? Text)?.value, "foo")
-
-        XCTAssertEqual(tag2?.type, .html)
         XCTAssertEqual(tag2?.value, "</del>")
     }
 }

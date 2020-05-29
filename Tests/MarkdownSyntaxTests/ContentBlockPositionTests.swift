@@ -104,7 +104,6 @@ final class ContentBlockPositionTests: XCTestCase {
         let codeRange = input.range(0...45)
 
         // then
-        XCTAssertEqual(code?.type, .code)
         XCTAssertEqual(code?.position.range, codeRange)
         XCTAssertEqual(tree.position.range, codeRange)
     }
@@ -129,8 +128,8 @@ final class ContentBlockPositionTests: XCTestCase {
         let textRange2 = input.range(25...48)
 
         // then
-        XCTAssertEqual(blockquote?.type, .blockquote)
-        XCTAssertEqual(softBreak?.type, .softBreak)
+        XCTAssertNotNil(blockquote)
+        XCTAssertNotNil(softBreak)
         XCTAssertEqual(text?.position.range, textRange)
         XCTAssertEqual(text2?.position.range, textRange2)
     }

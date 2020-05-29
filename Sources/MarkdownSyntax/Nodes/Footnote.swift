@@ -7,7 +7,6 @@
 //
 
 public struct Footnote: StaticPhrasingContent, PhrasingContent, Parent {
-    public let type: NodeType = .footnote
     public let children: [PhrasingContent]
     public let position: Position
 

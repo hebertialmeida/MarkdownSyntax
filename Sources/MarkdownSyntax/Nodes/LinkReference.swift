@@ -7,7 +7,6 @@
 //
 
 public struct LinkReference: PhrasingContent, Parent, Reference {
-    public let type: NodeType = .linkReference
     public let referenceType: ReferenceType
     public let children: [StaticPhrasingContent]
     public let position: Position

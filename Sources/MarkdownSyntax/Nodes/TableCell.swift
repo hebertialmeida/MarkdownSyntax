@@ -7,7 +7,6 @@
 //
 
 public struct TableCell: RowContent, Parent {
-    public let type: NodeType = .tableCell
     public let children: [PhrasingContent]
     public let position: Position
 

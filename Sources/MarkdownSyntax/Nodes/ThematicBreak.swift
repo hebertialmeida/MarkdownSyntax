@@ -7,7 +7,6 @@
 //
 
 public struct ThematicBreak: BlockContent {
-    public let type: NodeType = .thematicBreak
     public let position: Position
 
     public init(position: Position) {

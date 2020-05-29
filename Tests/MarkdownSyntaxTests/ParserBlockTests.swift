@@ -31,13 +31,6 @@ final class ParserBlockTests: XCTestCase {
         let text6 = heading6?.children.first as? Text
 
         // then
-        XCTAssertEqual(heading1?.type, .heading)
-        XCTAssertEqual(heading2?.type, .heading)
-        XCTAssertEqual(heading3?.type, .heading)
-        XCTAssertEqual(heading4?.type, .heading)
-        XCTAssertEqual(heading5?.type, .heading)
-        XCTAssertEqual(heading6?.type, .heading)
-
         XCTAssertEqual(text1?.value, "Header 1")
         XCTAssertEqual(text2?.value, "Header 2")
         XCTAssertEqual(text3?.value, "Header 3")
@@ -67,8 +60,6 @@ final class ParserBlockTests: XCTestCase {
         let text2 = paragraph2?.children.first as? Text
 
         // then
-        XCTAssertEqual(definition?.type, .footnoteDefinition)
-        XCTAssertEqual(definition2?.type, .footnoteDefinition)
         XCTAssertEqual(definition?.identifier, "1")
         XCTAssertEqual(definition2?.identifier, "2")
         XCTAssertEqual(text?.value, "Here is the footnote.")
@@ -92,8 +83,7 @@ final class ParserBlockTests: XCTestCase {
         let text2 = paragraph?.children[2] as? Text
 
         // then
-        XCTAssertEqual(blockquote?.type, .blockquote)
-        XCTAssertEqual(softBreak?.type, .softBreak)
+        XCTAssertNotNil(softBreak)
         XCTAssertEqual(text?.value, "Alpha bravo charlie.")
         XCTAssertEqual(text2?.value, "This is the second line.")
     }
@@ -112,7 +102,7 @@ final class ParserBlockTests: XCTestCase {
         let thematicBreak = tree.children[1] as? ThematicBreak
 
         // then
-        XCTAssertEqual(thematicBreak?.type, .thematicBreak)
+        XCTAssertNotNil(thematicBreak)
     }
 
     func testCode() throws {
@@ -131,7 +121,6 @@ final class ParserBlockTests: XCTestCase {
         let code = tree.children.first as? Code
 
         // then
-        XCTAssertEqual(code?.type, .code)
         XCTAssertEqual(code?.language, "swift")
         XCTAssertEqual(code?.meta, nil)
         XCTAssertEqual(code?.value, "func some() {\n    print(\"code\")\n}\n")
@@ -151,7 +140,6 @@ final class ParserBlockTests: XCTestCase {
         let code = tree.children.first as? HTML
 
         // then
-        XCTAssertEqual(code?.type, .html)
         XCTAssertEqual(code?.value, "<div id=\"foo\"\n  class=\"bar\">\n</div>\n")
     }
 
@@ -164,7 +152,6 @@ final class ParserBlockTests: XCTestCase {
         let code = tree.children.first as? HTML
 
         // then
-        XCTAssertEqual(code?.type, .html)
         XCTAssertEqual(code?.value, "<!-- this -->\n")
     }
 
@@ -190,7 +177,6 @@ final class ParserBlockTests: XCTestCase {
         let text3 = (third?.children.first as? Paragraph)?.children.first as? Text
 
         // then
-        XCTAssertEqual(list?.type, .list)
         XCTAssertEqual(list?.ordered, false)
         XCTAssertEqual(list?.start, nil)
         XCTAssertEqual(list?.spread, false)
@@ -228,7 +214,6 @@ final class ParserBlockTests: XCTestCase {
         let text3 = (third?.children.first as? Paragraph)?.children.first as? Text
 
         // then
-        XCTAssertEqual(list?.type, .list)
         XCTAssertEqual(list?.ordered, true)
         XCTAssertEqual(list?.start, 1)
         XCTAssertEqual(list?.spread, false)
@@ -269,7 +254,6 @@ final class ParserBlockTests: XCTestCase {
         let text4 = (fourth?.children.first as? Paragraph)?.children.first as? Text
 
         // then
-        XCTAssertEqual(list?.type, .list)
         XCTAssertEqual(list?.ordered, false)
         XCTAssertEqual(list?.start, nil)
         XCTAssertEqual(list?.spread, false)
@@ -313,7 +297,6 @@ final class ParserBlockTests: XCTestCase {
         let text3 = (third?.children.first as? Paragraph)?.children.first as? Text
 
         // then
-        XCTAssertEqual(list?.type, .list)
         XCTAssertEqual(list?.spread, true)
 
         XCTAssertEqual(first?.checked, nil)
@@ -349,7 +332,6 @@ final class ParserBlockTests: XCTestCase {
         let text3 = (third?.children.first as? Paragraph)?.children.first as? Text
 
         // then
-        XCTAssertEqual(list?.type, .list)
         XCTAssertEqual(list?.spread, false)
 
         XCTAssertEqual(first?.checked, nil)
@@ -389,7 +371,6 @@ final class ParserBlockTests: XCTestCase {
         let text3 = (third?.children.first as? Paragraph)?.children.first as? Text
 
         // then
-        XCTAssertEqual(list?.type, .list)
         XCTAssertEqual(list?.spread, true)
 
         XCTAssertEqual(first?.checked, nil)
@@ -433,12 +414,9 @@ final class ParserBlockTests: XCTestCase {
         let textCell3Row1 = (row1?.children[3] as? TableCell)?.children[0] as? Text
 
         // then
-        XCTAssertEqual(table?.type, .table)
         XCTAssertEqual(table?.align, [.left, .center, .none, .right])
 
-        XCTAssertEqual(row0?.type, .tableRow)
         XCTAssertEqual(row0?.isHeader, true)
-        XCTAssertEqual(row1?.type, .tableRow)
         XCTAssertEqual(row1?.isHeader, false)
 
         XCTAssertEqual(textCell0Row0?.value, "foo")

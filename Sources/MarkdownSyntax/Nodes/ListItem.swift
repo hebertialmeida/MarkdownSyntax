@@ -7,7 +7,6 @@
 //
 
 public struct ListItem: ListContent, Parent {
-    public let type: NodeType = .listItem
     public let checked: Bool?
     public let spread: Bool?
     public let children: [BlockContent]

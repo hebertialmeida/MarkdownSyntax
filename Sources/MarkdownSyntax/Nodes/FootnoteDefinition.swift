@@ -7,7 +7,6 @@
 //
 
 public struct FootnoteDefinition: DefinitionContent, Parent, Association {
-    public let type: NodeType = .footnoteDefinition
     public let identifier: String
     public let label: String?
     public let children: [BlockContent]

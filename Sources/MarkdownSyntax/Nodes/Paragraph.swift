@@ -7,7 +7,6 @@
 //
 
 public struct Paragraph: BlockContent, Parent {
-    public let type: NodeType = .paragraph
     public let children: [PhrasingContent]
     public let position: Position
 

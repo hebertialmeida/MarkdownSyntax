@@ -9,7 +9,6 @@
 import struct Foundation.URL
 
 public struct Link: PhrasingContent, Parent, Resource {
-    public let type: NodeType = .link
     public let url: URL
     public let title: String?
     public let children: [StaticPhrasingContent]

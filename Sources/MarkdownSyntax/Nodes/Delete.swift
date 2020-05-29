@@ -7,7 +7,6 @@
 //
 
 public struct Delete: StaticPhrasingContent, PhrasingContent, Parent {
-    public let type: NodeType = .delete
     public let children: [PhrasingContent]
     public let position: Position
 

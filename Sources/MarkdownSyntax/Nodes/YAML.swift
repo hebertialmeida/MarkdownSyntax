@@ -7,7 +7,6 @@
 //
 
 public struct YAML: FrontmatterContent, Literal {
-    public var type: NodeType = .yaml
     public var value: String
     public var position: Position
 

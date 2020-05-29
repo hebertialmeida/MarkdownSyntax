@@ -8,7 +8,6 @@
 
 /// Break represents a soft line break, such as in poems or addresses.
 public struct Break: StaticPhrasingContent, PhrasingContent {
-    public let type: NodeType = .break
     public let position: Position
 
     public init(position: Position) {

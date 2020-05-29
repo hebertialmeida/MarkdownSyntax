@@ -7,7 +7,6 @@
 //
 
 public struct InlineCode: StaticPhrasingContent, PhrasingContent, Literal {
-    public let type: NodeType = .inlineCode
     public let value: String
     public let position: Position
 

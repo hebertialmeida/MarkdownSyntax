@@ -8,7 +8,6 @@
 
 /// SoftBreak represents a hard line break, such as new paragraph.
 public struct SoftBreak: StaticPhrasingContent, PhrasingContent {
-    public let type: NodeType = .softBreak
     public let position: Position
 
     public init(position: Position) {

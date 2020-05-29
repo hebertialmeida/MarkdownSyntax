@@ -7,7 +7,6 @@
 //
 
 public struct HTML: BlockContent, StaticPhrasingContent, PhrasingContent, Literal {
-    public let type: NodeType = .html
     public let value: String
     public let position: Position
 

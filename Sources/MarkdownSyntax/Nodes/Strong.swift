@@ -7,7 +7,6 @@
 //
 
 public struct Strong: StaticPhrasingContent, PhrasingContent, Parent {
-    public let type: NodeType = .strong
     public let children: [PhrasingContent]
     public let position: Position
 

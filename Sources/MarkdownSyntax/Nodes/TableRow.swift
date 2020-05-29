@@ -7,7 +7,6 @@
 //
 
 public struct TableRow: TableContent, Parent {
-    public let type: NodeType = .tableRow
     public let isHeader: Bool
     public let children: [RowContent]
     public let position: Position

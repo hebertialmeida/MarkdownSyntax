@@ -12,9 +12,6 @@ import struct Foundation.URL
 
 /// Syntactic units in unist syntax trees are called nodes.
 public protocol Node {
-    /// The variant of a node.
-    var type: NodeType { get }
-
     /// Location of a node in a source document.
     /// Must not be present if a node is generated.
     var position: Position { get }

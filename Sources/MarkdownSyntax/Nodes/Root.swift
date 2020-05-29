@@ -10,7 +10,6 @@
 /// Root can be used as the root of a tree, never as a child. Its content model is not limited to top-level content,
 /// but can contain any content with the restriction that all content must be of the same category.
 public struct Root: Parent {
-    public let type: NodeType = .root
     public let children: [Content]
     public let position: Position
 

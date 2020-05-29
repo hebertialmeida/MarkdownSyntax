@@ -9,7 +9,6 @@
 import struct Foundation.URL
 
 public struct Definition: DefinitionContent, Association, Resource {
-    public let type: NodeType = .definition
     public let identifier: String
     public let label: String?
     public let url: URL

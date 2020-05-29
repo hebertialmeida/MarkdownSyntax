@@ -7,7 +7,6 @@
 //
 
 public struct Code: BlockContent, Literal {
-    public let type: NodeType = .code
     public let value: String
     public let language: String?
     public let meta: String?

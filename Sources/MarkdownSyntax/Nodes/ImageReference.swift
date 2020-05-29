@@ -7,7 +7,6 @@
 //
 
 public struct ImageReference: StaticPhrasingContent, PhrasingContent, Parent, Reference, Alternative {
-    public let type: NodeType = .imageReference
     public let referenceType: ReferenceType
     public let alt: String?
     public let children: [PhrasingContent]

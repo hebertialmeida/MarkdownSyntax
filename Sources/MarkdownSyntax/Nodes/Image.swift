@@ -9,7 +9,6 @@
 import struct Foundation.URL
 
 public struct Image: StaticPhrasingContent, PhrasingContent, Parent, Resource, Alternative {
-    public let type: NodeType = .image
     public let url: URL
     public let title: String?
     public let alt: String?
