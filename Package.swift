@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 
 import PackageDescription
 
@@ -9,7 +9,7 @@ let package = Package(
         .library(name: "MarkdownSyntax", targets: ["MarkdownSyntax"]),
     ],
     dependencies: [
-        .package(name: "cmark_gfm", url: "https://github.com/hebertialmeida/swift-cmark-gfm", .upToNextMajor(from: "1.0.0"))
+        .package(name: "cmark_gfm", url: "https://github.com/hebertialmeida/swift-cmark-gfm", .upToNextMajor(from: "1.1.0"))
     ],
     targets: [
         .target(name: "MarkdownSyntax", dependencies: ["cmark_gfm"]),
