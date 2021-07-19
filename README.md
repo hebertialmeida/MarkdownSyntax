@@ -71,7 +71,7 @@ Once you have your Swift package set up, adding MarkdownSyntax as a dependency i
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/hebertialmeida/MarkdownSyntax", from: "1.0.0")
+    .package(url: "https://github.com/hebertialmeida/MarkdownSyntax", from: "1.1.0")
 ]
 ```
 
