@@ -40,7 +40,7 @@ Root(
                     ], 
                     position: Position(
                         start: Point(line: 1, column: 12, offset: 11), 
-                        end: MarkdownSyntax.Point(line: 1, column: 20, offset: 19), 
+                        end: Point(line: 1, column: 20, offset: 19), 
                         indent: nil
                     )
                 )
