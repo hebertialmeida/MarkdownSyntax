@@ -3,7 +3,7 @@ import XCTest
 
 final class ContentBlockPositionTests: XCTestCase {
 
-    func testHeadingWithInline() throws {
+    func testHeadingWithInline() async throws {
         // given
         let input =
         """
@@ -13,7 +13,7 @@ final class ContentBlockPositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let heading1 = tree.children[0] as? Heading
         let headingStrong = heading1?.children[1] as? Strong
 
@@ -27,7 +27,7 @@ final class ContentBlockPositionTests: XCTestCase {
         XCTAssertEqual(input[headingStrongRange], "**bold**")
     }
 
-    func testParagraphWithInline() throws {
+    func testParagraphWithInline() async throws {
         // given
         let input =
         """
@@ -39,7 +39,7 @@ final class ContentBlockPositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children[1] as? Paragraph
         let paragraphStrong = paragraph?.children[1] as? Strong
         let paragraphEmphasis = paragraphStrong?.children[1] as? Emphasis
@@ -64,7 +64,7 @@ final class ContentBlockPositionTests: XCTestCase {
         XCTAssertEqual(input[paragraphStrongRange2], "**application**")
     }
 
-    func testParagraphWithInlineCode() throws {
+    func testParagraphWithInlineCode() async throws {
         // given
         let input =
         """
@@ -76,7 +76,7 @@ final class ContentBlockPositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children[2] as? Paragraph
         let inlineCode = paragraph?.children[1] as? InlineCode
 
@@ -87,7 +87,7 @@ final class ContentBlockPositionTests: XCTestCase {
         XCTAssertEqual(input[inlineCodeRange], "`alpha-inline`")
     }
 
-    func testCodeBlockPosition() throws {
+    func testCodeBlockPosition() async throws {
         // given
         let input =
         """
@@ -99,7 +99,7 @@ final class ContentBlockPositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let code = tree.children.first as? Code
         let codeRange = input.range(0...45)
 
@@ -108,7 +108,7 @@ final class ContentBlockPositionTests: XCTestCase {
         XCTAssertEqual(tree.position.range, codeRange)
     }
 
-    func testBlockquotePosition() throws {
+    func testBlockquotePosition() async throws {
         // given
         let input =
         """
@@ -117,7 +117,7 @@ final class ContentBlockPositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let blockquote = tree.children.first as? Blockquote
         let paragraph = blockquote?.children.first as? Paragraph
         let text = paragraph?.children.first as? Text
@@ -134,7 +134,7 @@ final class ContentBlockPositionTests: XCTestCase {
         XCTAssertEqual(text2?.position.range, textRange2)
     }
 
-    func testFootnoteDefinitionPosition() throws {
+    func testFootnoteDefinitionPosition() async throws {
         // given
         let input =
         """
@@ -145,7 +145,7 @@ final class ContentBlockPositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let node = tree.children[1] as? FootnoteDefinition
         let node2 = tree.children[2] as? FootnoteDefinition
         let range = input.range(88...92)
@@ -160,12 +160,12 @@ final class ContentBlockPositionTests: XCTestCase {
         XCTAssertEqual(input[range2], "[^longnote]:")
     }
 
-    func testHTMLPosition() throws {
+    func testHTMLPosition() async throws {
         // given
         let input = "<div>this</div>"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let node = tree.children.first as? HTML
         let range = input.range(0...15)
 
@@ -175,12 +175,12 @@ final class ContentBlockPositionTests: XCTestCase {
     }
 
     // Because html comment is a inline element seems that the behaviour is weird, double check this later
-    func testHTMLCommentPosition() throws {
+    func testHTMLCommentPosition() async throws {
         // given
         let input = "<!-- this -->\n"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let node = tree.children.first as? HTML
         let range = input.range(0...13)
 

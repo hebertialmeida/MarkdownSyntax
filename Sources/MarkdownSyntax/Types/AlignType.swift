@@ -7,7 +7,7 @@
 //
 
 /// Represents how phrasing content is aligned on a Table.
-public enum AlignType: String, Codable {
+public enum AlignType: String, Codable, Sendable {
     case center = "c"
     case left = "l"
     case none = ""

@@ -9,24 +9,38 @@
 import cmark_gfm
 
 /// Represents a cmark extension node type.
-public enum CMNodeExtensionType: Equatable {
+public enum CMNodeExtensionType: Equatable, Sendable {
     case strikethrough
     case table
     case tableRow
     case tableCell
     case other(UInt32)
 
+    /// Ideally this should be
+    /// CMARK_NODE_STRIKETHROUGH.rawValue,
+    /// CMARK_NODE_TABLE.rawValue,
+    /// CMARK_NODE_TABLE_ROW.rawValue,
+    /// CMARK_NODE_TABLE_CELL.rawValue
+    ///
+    /// But Swift 6 strict concurrency complains about that.
+    private struct CMarkConstants {
+        static let strikethrough: UInt32 = 49164  // 0xBFFC
+        static let table: UInt32 = 32780          // 0x800C
+        static let tableRow: UInt32 = 32781       // 0x800D
+        static let tableCell: UInt32 = 32782      // 0x800E
+    }
+
     /// The raw value.
     var rawValue: UInt32 {
         switch self {
         case .strikethrough:
-            return CMARK_NODE_STRIKETHROUGH.rawValue
+            return CMarkConstants.strikethrough
         case .table:
-            return CMARK_NODE_TABLE.rawValue
+            return CMarkConstants.table
         case .tableRow:
-            return CMARK_NODE_TABLE_ROW.rawValue
+            return CMarkConstants.tableRow
         case .tableCell:
-            return CMARK_NODE_TABLE_CELL.rawValue
+            return CMarkConstants.tableCell
         case let .other(rawValue):
             return rawValue
         }

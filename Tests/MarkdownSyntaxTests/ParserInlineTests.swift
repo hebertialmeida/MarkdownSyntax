@@ -3,12 +3,12 @@ import XCTest
 
 final class ParserInlineTests: XCTestCase {
 
-    func testLink() throws {
+    func testLink() async throws {
         // given
         let input = #"[alpha](https://example.com "bravo")"#
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let linkText = link?.children.first as? Text
@@ -20,7 +20,7 @@ final class ParserInlineTests: XCTestCase {
     }
 
     // Fixes https://github.com/commonmark/commonmark.js/issues/177
-    func testInvalidLink() throws {
+    func testInvalidLink() async throws {
         // given
         let input = """
         [link](/u(ri )
@@ -29,7 +29,7 @@ final class ParserInlineTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let child0 = paragraph?.children[0] as? Text
         let child1 = paragraph?.children[1] as? SoftBreak
@@ -46,12 +46,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertNotNil(child4)
     }
     
-    func testAutoLink() throws {
+    func testAutoLink() async throws {
         // given
         let input = "https://example.com"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let text = paragraph?.children[0] as? Text
         let link = paragraph?.children[1] as? Link
@@ -64,12 +64,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(linkText?.value, "https://example.com")
     }
 
-    func testLinkWithEmptyChildTitle() throws {
+    func testLinkWithEmptyChildTitle() async throws {
         // given
         let input = "[](https://example.com)"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
 
@@ -79,12 +79,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(link?.children.count, 0)
     }
 
-    func testInternalLink() throws {
+    func testInternalLink() async throws {
         // given
         let input = "[Page 52](#some-topic)"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let linkText = link?.children.first as? Text
@@ -95,12 +95,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(linkText?.value, "Page 52")
     }
 
-    func testImage() throws {
+    func testImage() async throws {
         // given
         let input = #"![alpha](https://example.com/favicon.ico "bravo")"#
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let image = paragraph?.children.first as? Image
 
@@ -110,12 +110,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(image?.alt, "alpha")
     }
 
-    func testImageWithLinkInsideAlt() throws {
+    func testImageWithLinkInsideAlt() async throws {
         // given
         let input = #"![foo [bar](/url)](https://example.com/favicon.ico "bravo")"#
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let image = paragraph?.children.first as? Image
         let link = image?.children[1] as? Link
@@ -129,12 +129,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(linkText?.value, "bar")
     }
 
-    func testStrikethrough() throws {
+    func testStrikethrough() async throws {
         // given
         let input = "~~alpha~~"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let delete = paragraph?.children.first as? Delete
         let deleteText = delete?.children.first as? Text
@@ -143,12 +143,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(deleteText?.value, "alpha")
     }
 
-    func testStrong() throws {
+    func testStrong() async throws {
         // given
         let input = "**alpha**"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Strong
         let text = node?.children.first as? Text
@@ -157,12 +157,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(text?.value, "alpha")
     }
 
-    func testStrongUnderscore() throws {
+    func testStrongUnderscore() async throws {
         // given
         let input = "__alpha__"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Strong
         let text = node?.children.first as? Text
@@ -171,12 +171,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(text?.value, "alpha")
     }
 
-    func testEmphasis() throws {
+    func testEmphasis() async throws {
         // given
         let input = "*alpha*"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Emphasis
         let text = node?.children.first as? Text
@@ -185,12 +185,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(text?.value, "alpha")
     }
 
-    func testEmphasisUnderscore() throws {
+    func testEmphasisUnderscore() async throws {
         // given
         let input = "_alpha_"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Emphasis
         let text = node?.children.first as? Text
@@ -199,12 +199,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(text?.value, "alpha")
     }
 
-    func testInlineCode() throws {
+    func testInlineCode() async throws {
         // given
         let input = "`alpha`"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? InlineCode
         let text = node?.value
@@ -213,12 +213,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(text, "alpha")
     }
 
-    func testSoftBreak() throws {
+    func testSoftBreak() async throws {
         // given
         let input = "foo\nbar"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
 
         // then
@@ -227,7 +227,7 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertNotNil(paragraph?.children[2] as? Text)
     }
 
-    func testLineBreak() throws {
+    func testLineBreak() async throws {
         // given
         let input =
         """
@@ -237,14 +237,14 @@ final class ParserInlineTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
 
         // then
         XCTAssertNotNil(tree.children[0] as? Paragraph)
         XCTAssertNotNil(tree.children[1] as? Paragraph)
     }
 
-    func testSpaceLineBreak() throws {
+    func testSpaceLineBreak() async throws {
         // given
         let input =
         """
@@ -253,7 +253,7 @@ final class ParserInlineTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
 
         // then
@@ -262,7 +262,7 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertNotNil(paragraph?.children[2] as? Text)
     }
 
-    func testFootnoteReference() throws {
+    func testFootnoteReference() async throws {
         // given
         let input =
         """
@@ -273,7 +273,7 @@ final class ParserInlineTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children[1] as? FootnoteReference
         let node2 = paragraph?.children[3] as? FootnoteReference
@@ -285,12 +285,12 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(node2?.label, "2")
     }
 
-    func testHTMLInline() throws {
+    func testHTMLInline() async throws {
         // given
         let input = "<del>*foo*</del>"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let tag1 = paragraph?.children[0] as? HTML
         let emphasis = paragraph?.children[1] as? Emphasis

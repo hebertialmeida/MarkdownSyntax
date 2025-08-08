@@ -19,7 +19,7 @@ public struct Heading: BlockContent, Parent {
 }
 
 public extension Heading {
-    enum Depth: Int, Codable {
+    enum Depth: Int, Codable, Sendable {
         case h1 = 1
         case h2 = 2
         case h3 = 3

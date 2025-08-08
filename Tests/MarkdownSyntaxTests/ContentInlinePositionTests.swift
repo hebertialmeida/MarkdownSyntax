@@ -3,12 +3,12 @@ import XCTest
 
 final class ContentInlinePositionTests: XCTestCase {
 
-    func testLinkRange() throws {
+    func testLinkRange() async throws {
         // given
         let input = #"[alpha](https://example.com "bravo")"#
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let range = input.range(0...35)
@@ -20,12 +20,12 @@ final class ContentInlinePositionTests: XCTestCase {
 
     // MARK: GFM autolink
 
-    func testAutoLinkRange() throws {
+    func testAutoLinkRange() async throws {
         // given
         let input = "testing http://www.example.com is a autolink"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children[1] as? Link
         let range = input.range(8...29)
@@ -35,12 +35,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "http://www.example.com")
     }
 
-    func testAutoLinkHttpsRange() throws {
+    func testAutoLinkHttpsRange() async throws {
         // given
         let input = "testing https://www.example.com is a autolink"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children[1] as? Link
         let range = input.range(8...30)
@@ -50,12 +50,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "https://www.example.com")
     }
 
-    func testAutoLinkFtpRange() throws {
+    func testAutoLinkFtpRange() async throws {
         // given
         let input = "testing ftp://www.example.com is a autolink"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children[1] as? Link
         let range = input.range(8...28)
@@ -65,12 +65,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "ftp://www.example.com")
     }
 
-    func testWwwAutoLinkRange() throws {
+    func testWwwAutoLinkRange() async throws {
         // given
         let input = "testing www.example.com is a autolink"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children[1] as? Link
         let range = input.range(8...22)
@@ -82,12 +82,12 @@ final class ContentInlinePositionTests: XCTestCase {
 
     // MARK: Native cmark autolink
 
-    func testAutoLinkBracesRange() throws {
+    func testAutoLinkBracesRange() async throws {
         // given
         let input = "<https://example.com>"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let range = input.range(0...20)
@@ -97,12 +97,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "<https://example.com>")
     }
 
-    func testLinkWithEmptyChildRange() throws {
+    func testLinkWithEmptyChildRange() async throws {
         // given
         let input = "[](https://example.com)"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let range = input.range(0...22)
@@ -112,12 +112,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "[](https://example.com)")
     }
 
-    func testInternalLinkRange() throws {
+    func testInternalLinkRange() async throws {
         // given
         let input = "[Page 52](#some-topic)"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let link = paragraph?.children.first as? Link
         let range = input.range(0...21)
@@ -127,12 +127,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "[Page 52](#some-topic)")
     }
 
-    func testImageRange() throws {
+    func testImageRange() async throws {
         // given
         let input = #"![alpha](https://example.com/favicon.ico "bravo")"#
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let image = paragraph?.children.first as? Image
         let range = input.range(0...48)
@@ -142,12 +142,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], #"![alpha](https://example.com/favicon.ico "bravo")"#)
     }
 
-    func testStrikethroughRange() throws {
+    func testStrikethroughRange() async throws {
         // given
         let input = "~~alpha~~"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let delete = paragraph?.children.first as? Delete
         let range = input.range(0...8)
@@ -157,12 +157,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "~~alpha~~")
     }
 
-    func testStrongRange() throws {
+    func testStrongRange() async throws {
         // given
         let input = "**alpha**"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Strong
         let range = input.range(0...8)
@@ -172,12 +172,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "**alpha**")
     }
 
-    func testStrongUnderscoreRange() throws {
+    func testStrongUnderscoreRange() async throws {
         // given
         let input = "__alpha__"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Strong
         let range = input.range(0...8)
@@ -187,12 +187,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "__alpha__")
     }
 
-    func testEmphasisRange() throws {
+    func testEmphasisRange() async throws {
         // given
         let input = "*alpha*"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Emphasis
         let range = input.range(0...6)
@@ -202,12 +202,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "*alpha*")
     }
 
-    func testEmphasisUnderscoreRange() throws {
+    func testEmphasisUnderscoreRange() async throws {
         // given
         let input = "_alpha_"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? Emphasis
         let range = input.range(0...6)
@@ -217,12 +217,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "_alpha_")
     }
 
-    func testInlineCodeRange() throws {
+    func testInlineCodeRange() async throws {
         // given
         let input = "`alpha`"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? InlineCode
         let range = input.range(0...6)
@@ -232,12 +232,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "`alpha`")
     }
 
-    func testInlineCodeRangeMultiBackticks() throws {
+    func testInlineCodeRangeMultiBackticks() async throws {
         // given
         let input = "```alpha```"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children.first as? InlineCode
         let range = input.range(0...10)
@@ -247,12 +247,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range], "```alpha```")
     }
 
-    func testSoftBreakRange() throws {
+    func testSoftBreakRange() async throws {
         // given
         let input = "foo\nbar"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let softBreak = paragraph?.children[1] as? SoftBreak
 
@@ -260,7 +260,7 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertNil(softBreak?.position.range) // Cmark don't return any position for SoftBreak
     }
 
-    func testSpaceLineBreakRange() throws {
+    func testSpaceLineBreakRange() async throws {
         // given
         let input =
         """
@@ -269,7 +269,7 @@ final class ContentInlinePositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let lineBreak = paragraph?.children[1] as? Break
 
@@ -277,7 +277,7 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertNil(lineBreak?.position.range) // Cmark don't return any position for LineBreak
     }
 
-    func testFootnoteReferenceRange() throws {
+    func testFootnoteReferenceRange() async throws {
         // given
         let input =
         """
@@ -288,7 +288,7 @@ final class ContentInlinePositionTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children[1] as? FootnoteReference
         let node2 = paragraph?.children[3] as? FootnoteReference
@@ -302,12 +302,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range2], "[^longnote]")
     }
 
-    func testHTMLInlineRange() throws {
+    func testHTMLInlineRange() async throws {
         // given
         let input = "<del>*foo*</del>"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let tag1 = paragraph?.children[0] as? HTML
         let em = paragraph?.children[1] as? Emphasis
@@ -325,12 +325,12 @@ final class ContentInlinePositionTests: XCTestCase {
         XCTAssertEqual(input[range2], "</del>")
     }
 
-    func testHTMLInlineCommentPosition() throws {
+    func testHTMLInlineCommentPosition() async throws {
         // given
         let input = "This is some <!-- this --> bla bla bla"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let paragraph = tree.children.first as? Paragraph
         let node = paragraph?.children[1] as? HTML
         let range = input.range(13...25)

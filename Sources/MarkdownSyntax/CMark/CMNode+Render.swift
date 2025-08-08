@@ -20,7 +20,7 @@ public extension CMNode {
     ///     `CMDocumentError.renderError` if there is an error rendering the HTML.
     /// - Returns:
     ///     The HTML as a string.
-    func renderHtml(_ options: CMDocumentOption, extensions: CMExtensionOption) throws -> String {
+    func renderHtml(_ options: CMDocumentOption, extensions: CMExtensionOption) async throws -> String {
         var htmlExtensions: UnsafeMutablePointer<cmark_llist>?
 
         if extensions.contains(.tagfilters), let tagfilter = cmark_find_syntax_extension("tagfilter") {
@@ -35,7 +35,7 @@ public extension CMNode {
             free(buffer)
         }
 
-        guard let html = String(validatingUTF8: buffer) else {
+        guard let html = String(validatingCString: buffer) else {
             throw CMDocumentError.renderError
         }
 
@@ -50,7 +50,7 @@ public extension CMNode {
     ///     `CMDocumentError.renderError` if there is an error rendering the XML.
     /// - Returns:
     ///     The XML as a string.
-    func renderXml(_ options: CMDocumentOption) throws -> String {
+    func renderXml(_ options: CMDocumentOption) async throws -> String {
         guard let buffer = cmark_render_xml(cmarkNode, options.rawValue) else {
             throw CMDocumentError.renderError
         }
@@ -59,7 +59,7 @@ public extension CMNode {
             free(buffer)
         }
 
-        guard let xml = String(validatingUTF8: buffer) else {
+        guard let xml = String(validatingCString: buffer) else {
             throw CMDocumentError.renderError
         }
 
@@ -75,7 +75,7 @@ public extension CMNode {
     ///     `CMDocumentError.renderError` if there is an error rendering the man page.
     /// - Returns:
     ///     The man page as a string.
-    func renderMan(_ options: CMDocumentOption, width: Int32) throws -> String {
+    func renderMan(_ options: CMDocumentOption, width: Int32) async throws -> String {
         guard let buffer = cmark_render_man(cmarkNode, options.rawValue, width) else {
             throw CMDocumentError.renderError
         }
@@ -84,7 +84,7 @@ public extension CMNode {
             free(buffer)
         }
 
-        guard let man = String(validatingUTF8: buffer) else {
+        guard let man = String(validatingCString: buffer) else {
             throw CMDocumentError.renderError
         }
 
@@ -100,7 +100,7 @@ public extension CMNode {
     ///     `CMDocumentError.renderError` if there is an error rendering the common mark.
     /// - Returns:
     ///     The common mark as a string.
-    func renderCommonMark(_ options: CMDocumentOption, width: Int32) throws -> String {
+    func renderCommonMark(_ options: CMDocumentOption, width: Int32) async throws -> String {
         guard let buffer = cmark_render_commonmark(cmarkNode, options.rawValue, width) else {
             throw CMDocumentError.renderError
         }
@@ -109,7 +109,7 @@ public extension CMNode {
             free(buffer)
         }
 
-        guard let commonMark = String(validatingUTF8: buffer) else {
+        guard let commonMark = String(validatingCString: buffer) else {
             throw CMDocumentError.renderError
         }
 
@@ -125,7 +125,7 @@ public extension CMNode {
     ///     `CMDocumentError.renderError` if there is an error rendering the Latex.
     /// - Returns:
     ///     The Latex as a string.
-    func renderLatex(_ options: CMDocumentOption, width: Int32) throws -> String {
+    func renderLatex(_ options: CMDocumentOption, width: Int32) async throws -> String {
         guard let buffer = cmark_render_latex(cmarkNode, options.rawValue, width) else {
             throw CMDocumentError.renderError
         }
@@ -134,7 +134,7 @@ public extension CMNode {
             free(buffer)
         }
 
-        guard let latex = String(validatingUTF8: buffer) else {
+        guard let latex = String(validatingCString: buffer) else {
             throw CMDocumentError.renderError
         }
 
@@ -150,7 +150,7 @@ public extension CMNode {
     ///     `CMDocumentError.renderError` if there is an error rendering the plain text.
     /// - Returns:
     ///     The plain text as a string.
-    func renderPlainText(_ options: CMDocumentOption, width: Int32) throws -> String {
+    func renderPlainText(_ options: CMDocumentOption, width: Int32) async throws -> String {
         guard let buffer = cmark_render_plaintext(cmarkNode, options.rawValue, width) else {
             throw CMDocumentError.renderError
         }
@@ -159,7 +159,7 @@ public extension CMNode {
             free(buffer)
         }
 
-        guard let text = String(validatingUTF8: buffer) else {
+        guard let text = String(validatingCString: buffer) else {
             throw CMDocumentError.renderError
         }
 

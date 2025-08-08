@@ -3,12 +3,12 @@ import XCTest
 
 final class ParserTests: XCTestCase {
 
-    func testLineOffsets() throws {
+    func testLineOffsets() async throws {
         // given
         let input = "Line 1\nLine 2\rLine 3\r\nLine 4"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
 
         // then
         XCTAssertEqual(input.lineOffsets.count, 4)

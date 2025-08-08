@@ -14,8 +14,10 @@ public extension Markdown {
     /// - Returns:
     ///     A Swift AST (Abstract Syntax Tree).
     func parse() -> Root {
-        let items = parseContent(document.node.children)
-        return Root(children: items, position: position(for: document.node))
+        Root(
+            children: parseContent(document.node.children),
+            position: position(for: document.node)
+        )
     }
 
     /// Renders the document as HTML.
@@ -24,8 +26,8 @@ public extension Markdown {
     ///     `CMDocumentError.renderError` if there is an error rendering the HTML.
     /// - Returns:
     ///     The HTML as a string.
-    func renderHtml() throws -> String {
-        return try document.renderHtml()
+    func renderHtml() async throws -> String {
+        try await document.renderHtml()
     }
 
     /// Renders the document as XML.
@@ -34,8 +36,8 @@ public extension Markdown {
     ///     `CMDocumentError.renderError` if there is an error rendering the XML.
     /// - Returns:
     ///     The XML as a string.
-    func renderXml() throws -> String {
-        return try document.renderXml()
+    func renderXml() async throws -> String {
+        try await document.renderXml()
     }
 
     /// Renders the document as groff man page.
@@ -46,8 +48,8 @@ public extension Markdown {
     ///     `CMDocumentError.renderError` if there is an error rendering the man page.
     /// - Returns:
     ///     The man page as a string.
-    func renderMan(width: Int32) throws -> String {
-        return try document.renderMan(width: width)
+    func renderMan(width: Int32) async throws -> String {
+        try await document.renderMan(width: width)
     }
 
     /// Renders the document as common mark.
@@ -58,8 +60,8 @@ public extension Markdown {
     ///     `CMDocumentError.renderError` if there is an error rendering the common mark.
     /// - Returns:
     ///     The common mark as a string.
-    func renderCommonMark(width: Int32) throws -> String {
-        return try document.renderCommonMark(width: width)
+    func renderCommonMark(width: Int32) async throws -> String {
+        try await document.renderCommonMark(width: width)
     }
 
     /// Renders the document as Latex.
@@ -70,8 +72,8 @@ public extension Markdown {
     ///     `CMDocumentError.renderError` if there is an error rendering the Latex.
     /// - Returns:
     ///     The Latex as a string.
-    func renderLatex(width: Int32) throws -> String {
-        return try document.renderLatex(width: width)
+    func renderLatex(width: Int32) async throws -> String {
+        try await document.renderLatex(width: width)
     }
 
     /// Renders the document as plain text.
@@ -82,8 +84,7 @@ public extension Markdown {
     ///     `CMDocumentError.renderError` if there is an error rendering the plain text.
     /// - Returns:
     ///     The plain text as a string.
-    func renderPlainText(width: Int32) throws -> String {
-        return try document.renderPlainText(width: width)
+    func renderPlainText(width: Int32) async throws -> String {
+        try await document.renderPlainText(width: width)
     }
-
 }

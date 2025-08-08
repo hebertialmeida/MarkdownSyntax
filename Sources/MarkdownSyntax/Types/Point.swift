@@ -7,7 +7,7 @@
 //
 
 /// One place in a source file.
-public struct Point: Equatable {
+public struct Point: Equatable, Sendable {
     /// Line in a source file (1-indexed `Int`).
     public var line: Int
 

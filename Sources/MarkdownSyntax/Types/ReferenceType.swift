@@ -6,7 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
-public enum ReferenceType: String, Codable {
+public enum ReferenceType: String, Codable, Sendable {
     case shortcut
     case collapsed
     case full

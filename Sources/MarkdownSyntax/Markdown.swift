@@ -7,7 +7,7 @@
 //
 
 /// Markdown parser
-public class Markdown {
+public final actor Markdown {
 
     /// The current footnote index.
     private var footnoteIndex: Int = 0
@@ -32,7 +32,7 @@ public class Markdown {
     ///     `CMDocumentError.parsingError` if an invalid event type is encountered.
     /// - Returns:
     ///     The initialized parser.
-    public init(text: String, startingFootnoteIndex: Int = 0, options: CMDocumentOption = [.sourcepos, .strikethroughDoubleTilde, .footnotes], extensions: CMExtensionOption = [.all]) throws {
+    public init(text: String, startingFootnoteIndex: Int = 0, options: CMDocumentOption = [.sourcepos, .strikethroughDoubleTilde, .footnotes], extensions: CMExtensionOption = [.all]) async throws {
         self.text = text
         self.footnoteIndex = startingFootnoteIndex
         self.lineOffsets = text.lineOffsets
@@ -202,6 +202,6 @@ public class Markdown {
     // MARK: Position
 
     func position(for node: CMNode) -> Position {
-        return node.position(in: text, using: lineOffsets)
+        node.position(in: text, using: lineOffsets)
     }
 }
