@@ -6,10 +6,13 @@ jobs:
     runs-on: macos-latest
  
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4.2.2
+    - uses: swift-actions/setup-swift@v2.3.0
+      with:
+        swift-version: 6.1.0
     - name: Run tests
       run: set -o pipefail && time xcodebuild clean test -scheme MarkdownSyntax -sdk macosx -enableCodeCoverage YES | xcpretty
     - name: Codecov
-      uses: codecov/codecov-action@v1.0.5
+      uses: codecov/codecov-action@v5.4.3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
