@@ -11,7 +11,7 @@ jobs:
       with:
         swift-version: 6.1.0
     - name: Run tests
-        run: swift test --enable-code-coverage
+      run: swift test --enable-code-coverage
     - name: Generate coverage report
       id: test
       run: |
