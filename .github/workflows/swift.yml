@@ -10,13 +10,20 @@ jobs:
     - uses: swift-actions/setup-swift@v2.3.0
       with:
         swift-version: 6.1.0
-    - name: Run tests and generate coverage
+    - name: Run tests
+        run: swift test --enable-code-coverage
+    - name: Generate coverage report
       id: test
       run: |
-        swift test
-        COVERAGE_PATH=$(swift test --show-codecov-path)
-        TEST_BUNDLE=$(ls .build/debug/*.xctest | head -n 1)
-        xcrun llvm-cov export -format=lcov -instr-profile="$COVERAGE_PATH" "$TEST_BUNDLE/Contents/MacOS/$(basename "$TEST_BUNDLE" .xctest)" > lcov.info
+          CODECOV_PATH=$(swift test --show-codecov-path)
+          PROFDATA_PATH=$(dirname "$CODECOV_PATH")/default.profdata
+
+          ALL_OBJECT_FILES=$(find .build -name "*.o" -type f)
+          SOURCE_OBJECT_FILES=$(echo "$ALL_OBJECT_FILES" | grep "MarkdownSyntaxTests.build")
+
+          xcrun llvm-cov report -instr-profile $PROFDATA_PATH $SOURCE_OBJECT_FILES
+
+          xcrun llvm-cov export --format="lcov" -instr-profile $PROFDATA_PATH $SOURCE_OBJECT_FILES >> lcov.info
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5.4.3
       with:
