@@ -8,5 +8,5 @@
 import Foundation
 
 public var isCI: Bool {
-    ProcessInfo.processInfo.environment["CI"] == "TRUE"
+    ProcessInfo.processInfo.environment["CI"]?.lowercased() == "true"
 }
