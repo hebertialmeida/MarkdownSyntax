@@ -6,15 +6,14 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v4.2.2
-    - uses: swift-actions/setup-swift@v2.3.0
-      with:
-        swift-version: 6.1.0
-    - name: Run tests
-      run: swift test --enable-code-coverage
-    - name: Generate coverage report
-      id: test
-      run: |
+      - uses: actions/checkout@v4.2.2
+      - uses: swift-actions/setup-swift@v2.3.0
+        with:
+          swift-version: 6.1.0
+      - name: Run tests
+        run: swift test --enable-code-coverage
+      - name: Generate coverage report
+        run: |
           CODECOV_PATH=$(swift test --show-codecov-path)
           PROFDATA_PATH=$(dirname "$CODECOV_PATH")/default.profdata
 
@@ -24,8 +23,8 @@ jobs:
           xcrun llvm-cov report -instr-profile $PROFDATA_PATH $SOURCE_OBJECT_FILES
 
           xcrun llvm-cov export --format="lcov" -instr-profile $PROFDATA_PATH $SOURCE_OBJECT_FILES >> lcov.info
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v5.4.3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: lcov.info
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5.4.3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov.info
