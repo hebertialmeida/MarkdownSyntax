@@ -3,7 +3,7 @@ import XCTest
 
 final class ParserBlockTests: XCTestCase {
 
-    func testHeading() throws {
+    func testHeading() async throws {
         // given
         let input =
         """
@@ -16,7 +16,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let heading1 = tree.children[0] as? Heading
         let text1 = heading1?.children.first as? Text
         let heading2 = tree.children[1] as? Heading
@@ -39,7 +39,7 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(text6?.value, "Header 6")
     }
 
-    func testFootnoteDefinition() throws {
+    func testFootnoteDefinition() async throws {
         // given
         let input =
         """
@@ -50,7 +50,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let definition = tree.children[1] as? FootnoteDefinition
         let paragraph = definition?.children.first as? Paragraph
         let text = paragraph?.children.first as? Text
@@ -66,7 +66,7 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(text2?.value, "Here's one with multiple blocks.")
     }
 
-    func testBlockquote() throws {
+    func testBlockquote() async throws {
         // given
         let input =
         """
@@ -75,7 +75,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let blockquote = tree.children.first as? Blockquote
         let paragraph = blockquote?.children.first as? Paragraph
         let text = paragraph?.children.first as? Text
@@ -88,7 +88,7 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(text2?.value, "This is the second line.")
     }
 
-    func testThematicBreak() throws {
+    func testThematicBreak() async throws {
         // given
         let input =
         """
@@ -98,14 +98,14 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let thematicBreak = tree.children[1] as? ThematicBreak
 
         // then
         XCTAssertNotNil(thematicBreak)
     }
 
-    func testCode() throws {
+    func testCode() async throws {
         // given
         let input =
         """
@@ -117,7 +117,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let code = tree.children.first as? Code
 
         // then
@@ -126,7 +126,7 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(code?.value, "func some() {\n    print(\"code\")\n}\n")
     }
 
-    func testHTML() throws {
+    func testHTML() async throws {
         // given
         let input =
         """
@@ -136,19 +136,19 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let code = tree.children.first as? HTML
 
         // then
         XCTAssertEqual(code?.value, "<div id=\"foo\"\n  class=\"bar\">\n</div>\n")
     }
 
-    func testHTMLComment() throws {
+    func testHTMLComment() async throws {
         // given
         let input = "<!-- this -->\n"
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let code = tree.children.first as? HTML
 
         // then
@@ -157,7 +157,7 @@ final class ParserBlockTests: XCTestCase {
 
     // MARK: - List
 
-    func testList() throws {
+    func testList() async throws {
         // given
         let input =
         """
@@ -167,7 +167,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = list?.children[1] as? ListItem
@@ -194,7 +194,7 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(text3?.value, "Third")
     }
 
-    func testListOrdered() throws {
+    func testListOrdered() async throws {
         // given
         let input =
         """
@@ -204,7 +204,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = list?.children[1] as? ListItem
@@ -231,7 +231,7 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(text3?.value, "Third")
     }
 
-    func testListTask() throws {
+    func testListTask() async throws {
         // given
         let input =
         """
@@ -242,7 +242,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = list?.children[1] as? ListItem
@@ -275,7 +275,7 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(text4?.value, "[] Fourth")
     }
 
-    func testListSpread() throws {
+    func testListSpread() async throws {
         // given
         let input =
         """
@@ -287,7 +287,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = list?.children[1] as? ListItem
@@ -312,7 +312,7 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(text3?.value, "Third")
     }
 
-    func testListHierarchy() throws {
+    func testListHierarchy() async throws {
         // given
         let input =
         """
@@ -322,7 +322,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = (first?.children[1] as? List)?.children.first as? ListItem
@@ -347,7 +347,7 @@ final class ParserBlockTests: XCTestCase {
         XCTAssertEqual(text3?.value, "Third")
     }
 
-    func testListHierarchySpread() throws {
+    func testListHierarchySpread() async throws {
         // given
         let input =
         """
@@ -361,7 +361,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let list = tree.children.first as? List
         let first = list?.children[0] as? ListItem
         let second = (first?.children[1] as? List)?.children.first as? ListItem
@@ -388,7 +388,7 @@ final class ParserBlockTests: XCTestCase {
 
     // MARK: - Table
 
-    func testTable() throws {
+    func testTable() async throws {
         // given
         let input =
         """
@@ -398,7 +398,7 @@ final class ParserBlockTests: XCTestCase {
         """
 
         // when
-        let tree = try Markdown(text: input).parse()
+        let tree = try await Markdown(text: input).parse()
         let table = tree.children.first as? Table
         let row0 = table?.children[0] as? TableRow
         let row1 = table?.children[1] as? TableRow

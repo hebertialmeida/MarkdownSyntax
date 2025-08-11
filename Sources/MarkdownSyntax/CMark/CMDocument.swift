@@ -20,7 +20,7 @@ public enum CMDocumentError: Error {
 }
 
 /// Represents a cmark document.
-public class CMDocument {
+public class CMDocument: @unchecked Sendable {
 
     /// The root node of the document.
     public let node: CMNode
@@ -117,8 +117,8 @@ public extension CMDocument {
     ///     `CMDocumentError.renderError` if there is an error rendering the HTML.
     /// - Returns:
     ///     The HTML as a string.
-    func renderHtml() throws -> String {
-        return try node.renderHtml(options, extensions: extensions)
+    func renderHtml() async throws -> String {
+        try await node.renderHtml(options, extensions: extensions)
     }
 
     /// Renders the document as XML.
@@ -127,8 +127,8 @@ public extension CMDocument {
     ///     `CMDocumentError.renderError` if there is an error rendering the XML.
     /// - Returns:
     ///     The XML as a string.
-    func renderXml() throws -> String {
-        return try node.renderXml(options)
+    func renderXml() async throws -> String {
+        try await node.renderXml(options)
     }
 
     /// Renders the document as groff man page.
@@ -139,8 +139,8 @@ public extension CMDocument {
     ///     `CMDocumentError.renderError` if there is an error rendering the man page.
     /// - Returns:
     ///     The man page as a string.
-    func renderMan(width: Int32) throws -> String {
-        return try node.renderMan(options, width: width)
+    func renderMan(width: Int32) async throws -> String {
+        try await node.renderMan(options, width: width)
     }
 
     /// Renders the document as common mark.
@@ -151,8 +151,8 @@ public extension CMDocument {
     ///     `CMDocumentError.renderError` if there is an error rendering the common mark.
     /// - Returns:
     ///     The common mark as a string.
-    func renderCommonMark(width: Int32) throws -> String {
-        return try node.renderCommonMark(options, width: width)
+    func renderCommonMark(width: Int32) async throws -> String {
+        try await node.renderCommonMark(options, width: width)
     }
 
     /// Renders the document as Latex.
@@ -163,8 +163,8 @@ public extension CMDocument {
     ///     `CMDocumentError.renderError` if there is an error rendering the Latex.
     /// - Returns:
     ///     The Latex as a string.
-    func renderLatex(width: Int32) throws -> String {
-        return try node.renderLatex(options, width: width)
+    func renderLatex(width: Int32) async throws -> String {
+        try await node.renderLatex(options, width: width)
     }
 
     /// Renders the document as plain text.
@@ -175,8 +175,8 @@ public extension CMDocument {
     ///     `CMDocumentError.renderError` if there is an error rendering the plain text.
     /// - Returns:
     ///     The plain text as a string.
-    func renderPlainText(width: Int32) throws -> String {
-        return try node.renderPlainText(options, width: width)
+    func renderPlainText(width: Int32) async throws -> String {
+        try await node.renderPlainText(options, width: width)
     }
 
 }

@@ -7,7 +7,7 @@
 //
 
 /// Location of a node in a source file.
-public struct Position: Equatable {
+public struct Position: Equatable, Sendable {
     /// Place of the first character of the parsed source region.
     public let start: Point
 

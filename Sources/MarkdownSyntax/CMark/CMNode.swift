@@ -10,7 +10,7 @@ import struct Foundation.URL
 import cmark_gfm
 
 /// Represents a cmark node.
-public class CMNode {
+public final class CMNode: @unchecked Sendable {
 
     /// The underlying cmark node pointer.
     public let cmarkNode: UnsafeMutablePointer<cmark_node>

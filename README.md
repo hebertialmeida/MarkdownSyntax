@@ -9,7 +9,7 @@ MarkdownSyntax is a wrapper on top of the Github Flavoured Markdown that conform
 
 ```swift
 let input = "Hi this is **alpha**"
-let tree = try Markdown(text: input).parse()
+let tree = try await Markdown(text: input).parse()
 ```
 
 Outputs a normalized tree:
@@ -20,41 +20,41 @@ Root(
         Paragraph(
             children: [
                 Text(
-                    value: "Hi this is ", 
+                    value: "Hi this is ",
                     position: Position(
-                        start: Point(line: 1, column: 1, offset: 0), 
-                        end: Point(line: 1, column: 11, offset: 10), 
+                        start: Point(line: 1, column: 1, offset: 0),
+                        end: Point(line: 1, column: 11, offset: 10),
                         indent: nil
                     )
-                ), 
+                ),
                 Strong(
                     children: [
                         Text(
-                            value: "alpha", 
+                            value: "alpha",
                             position: Position(
-                                start: Point(line: 1, column: 14, offset: 13), 
-                                end: Point(line: 1, column: 18, offset: 17), 
+                                start: Point(line: 1, column: 14, offset: 13),
+                                end: Point(line: 1, column: 18, offset: 17),
                                 indent: nil
                             )
                         )
-                    ], 
+                    ],
                     position: Position(
-                        start: Point(line: 1, column: 12, offset: 11), 
-                        end: Point(line: 1, column: 20, offset: 19), 
+                        start: Point(line: 1, column: 12, offset: 11),
+                        end: Point(line: 1, column: 20, offset: 19),
                         indent: nil
                     )
                 )
-            ], 
+            ],
             position: Position(
-                start: Point(line: 1, column: 1, offset: 0), 
-                end: Point(line: 1, column: 20, offset: 19), 
+                start: Point(line: 1, column: 1, offset: 0),
+                end: Point(line: 1, column: 20, offset: 19),
                 indent: nil
             )
         )
-    ], 
+    ],
     position: Position(
-        start: Point(line: 1, column: 1, offset: 0), 
-        end: Point(line: 1, column: 20, offset: 19), 
+        start: Point(line: 1, column: 1, offset: 0),
+        end: Point(line: 1, column: 20, offset: 19),
         indent: nil
     )
 )
@@ -71,7 +71,7 @@ Once you have your Swift package set up, adding MarkdownSyntax as a dependency i
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/hebertialmeida/MarkdownSyntax", from: "1.1.0")
+    .package(url: "https://github.com/hebertialmeida/MarkdownSyntax", from: "1.2.0")
 ]
 ```
 

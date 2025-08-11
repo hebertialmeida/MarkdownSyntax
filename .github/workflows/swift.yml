@@ -1,15 +1,31 @@
 name: Swift
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   test:
-    runs-on: macos-latest
- 
+    runs-on: macos-15
+
     steps:
-    - uses: actions/checkout@v1
-    - name: Run tests
-      run: set -o pipefail && time xcodebuild clean test -scheme MarkdownSyntax -sdk macosx -enableCodeCoverage YES | xcpretty
-    - name: Codecov
-      uses: codecov/codecov-action@v1.0.5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+      - uses: actions/checkout@v4.2.2
+      - uses: maxim-lobanov/setup-xcode@v1.6.0
+        with:
+          xcode-version: '16.4.0'
+      - name: Run tests
+        run: swift test --enable-code-coverage
+      - name: Generate coverage report
+        run: |
+          CODECOV_DIR=$(find .build -name 'codecov' -type d | head -1)
+
+          xcrun llvm-profdata merge -sparse "$CODECOV_DIR"/*.profraw -o default.profdata
+          PROFDATA_PATH="default.profdata"
+
+          ALL_OBJECT_FILES=$(find .build -name "*.o" -type f)
+          SOURCE_OBJECT_FILES=$(echo "$ALL_OBJECT_FILES" | grep "MarkdownSyntaxTests.build")
+
+          xcrun llvm-cov report -instr-profile $PROFDATA_PATH $SOURCE_OBJECT_FILES
+          xcrun llvm-cov export -format="lcov" -instr-profile $PROFDATA_PATH $SOURCE_OBJECT_FILES >> lcov.info
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5.4.3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov.info
