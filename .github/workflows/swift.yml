@@ -1,18 +1,23 @@
 name: Swift
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   test:
     runs-on: macos-latest
- 
+
     steps:
     - uses: actions/checkout@v4.2.2
     - uses: swift-actions/setup-swift@v2.3.0
       with:
         swift-version: 6.1.0
-    - name: Run tests
-      run: swift test --enable-code-coverage
-    - name: Codecov
+    - name: Run tests and generate coverage
+      id: test
+      run: |
+        export COVERAGE_PATH=$(swift test --show-codecov-path)
+        TEST_BUNDLE=$(ls .build/debug/*.xctest | head -n 1)
+        llvm-cov export -format=lcov -instr-profile="$COVERAGE_PATH" "$TEST_BUNDLE" > lcov.info
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5.4.3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        files: lcov.info
