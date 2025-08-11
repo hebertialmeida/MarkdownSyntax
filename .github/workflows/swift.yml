@@ -13,9 +13,10 @@ jobs:
     - name: Run tests and generate coverage
       id: test
       run: |
-        export COVERAGE_PATH=$(swift test --show-codecov-path)
+        swift test
+        COVERAGE_PATH=$(swift test --show-codecov-path)
         TEST_BUNDLE=$(ls .build/debug/*.xctest | head -n 1)
-        llvm-cov export -format=lcov -instr-profile="$COVERAGE_PATH" "$TEST_BUNDLE" > lcov.info
+        xcrun llvm-cov export -format=lcov -instr-profile="$COVERAGE_PATH" "$TEST_BUNDLE/Contents/MacOS/$(basename "$TEST_BUNDLE" .xctest)" > lcov.info
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5.4.3
       with:
