@@ -3,7 +3,9 @@
 ![](https://github.com/hebertialmeida/MarkdownSyntax/workflows/Swift/badge.svg)
 [![codecov](https://codecov.io/gh/hebertialmeida/MarkdownSyntax/branch/master/graph/badge.svg)](https://codecov.io/gh/hebertialmeida/MarkdownSyntax)
 
-MarkdownSyntax is a wrapper on top of the Github Flavoured Markdown that conforms to [mdast](https://github.com/syntax-tree/mdast). It parses markdown and creates a normalized AST so you can use it not only for rendering markdown and syntax highlighting. In addition, you can render to standard cmark formats HTML, XML, Man, Latex, Plain Text.
+MarkdownSyntax is a wrapper on top of the GitHub Flavoured Markdown that conforms to [mdast](https://github.com/syntax-tree/mdast). It parses markdown and creates a normalized AST so you can use it not only for rendering markdown and syntax highlighting. In addition, you can render to standard markdown formats: HTML, XML, Man, LaTeX, Plain Text.
+
+If you want to see a real-world usage of MarkdownSyntax, check out https://pinery.app where this framework was designed for.
 
 ### Usage
 
