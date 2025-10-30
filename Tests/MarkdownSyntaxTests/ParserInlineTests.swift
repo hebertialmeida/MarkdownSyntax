@@ -22,6 +22,8 @@ final class ParserInlineTests: XCTestCase {
     // TODO: Enable this when https://github.com/swiftlang/swift-cmark/pull/84 is merged
     // Fixes https://github.com/commonmark/commonmark.js/issues/177
     func testInvalidLink() async throws {
+        try XCTSkipIf(isCI)
+
         // given
         let input = """
         [link](/u(ri )
