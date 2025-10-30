@@ -24,7 +24,7 @@ public enum CMNodeExtensionType: Equatable, Sendable {
     ///
     /// But Swift 6 strict concurrency complains about that.
     private struct CMarkConstants {
-        static let strikethrough: UInt32 = 49164  // 0xBFFC
+        static let strikethrough: UInt32 = 49165  // 0xBFFD
         static let table: UInt32 = 32780          // 0x800C
         static let tableRow: UInt32 = 32781       // 0x800D
         static let tableCell: UInt32 = 32782      // 0x800E
@@ -48,13 +48,13 @@ public enum CMNodeExtensionType: Equatable, Sendable {
 
     init(rawValue: UInt32) {
         switch rawValue {
-        case CMARK_NODE_STRIKETHROUGH.rawValue:
+        case CMarkConstants.strikethrough:
             self = .strikethrough
-        case CMARK_NODE_TABLE.rawValue:
+        case CMarkConstants.table:
             self = .table
-        case CMARK_NODE_TABLE_ROW.rawValue:
+        case CMarkConstants.tableRow:
             self = .tableRow
-        case CMARK_NODE_TABLE_CELL.rawValue:
+        case CMarkConstants.tableCell:
             self = .tableCell
         default:
             self = .other(rawValue)

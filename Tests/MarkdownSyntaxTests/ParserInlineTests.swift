@@ -19,6 +19,7 @@ final class ParserInlineTests: XCTestCase {
         XCTAssertEqual(linkText?.value, "alpha")
     }
 
+    // TODO: Enable this when https://github.com/swiftlang/swift-cmark/pull/84 is merged
     // Fixes https://github.com/commonmark/commonmark.js/issues/177
     func testInvalidLink() async throws {
         // given

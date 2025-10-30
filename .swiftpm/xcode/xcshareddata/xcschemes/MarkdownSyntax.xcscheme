@@ -54,7 +54,7 @@
             </BuildableReference>
             <SkippedTests>
                <Test
-                  Identifier = "ContentBlockPositionTests/testHTMLCommentPosition()">
+                  Identifier = "ParserInlineTests/testInvalidLink()">
                </Test>
             </SkippedTests>
          </TestableReference>

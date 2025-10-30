@@ -202,6 +202,11 @@ public final actor Markdown {
     // MARK: Position
 
     func position(for node: CMNode) -> Position {
-        node.position(in: text, using: lineOffsets)
+        switch node.type {
+        case .link, .footnoteDefinition:
+            return node.adjustedPosition(in: text, using: lineOffsets)
+        default:
+            return node.position(in: text, using: lineOffsets)
+        }
     }
 }

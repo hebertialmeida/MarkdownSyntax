@@ -152,10 +152,8 @@ final class ContentBlockPositionTests: XCTestCase {
         let range2 = input.range(116...127)
 
         // then
-//        XCTAssertEqual(node?.position.range, range)
         XCTAssertEqual(input[node!.position.range!], "[^1]: Here is the footnote.")
         XCTAssertEqual(input[range], "[^1]:")
-//        XCTAssertEqual(node2?.position.range, range2)
         XCTAssertEqual(input[node2!.position.range!], "[^longnote]: Here's one with multiple blocks.")
         XCTAssertEqual(input[range2], "[^longnote]:")
     }
@@ -175,11 +173,6 @@ final class ContentBlockPositionTests: XCTestCase {
     }
 
     func testHTMLCommentPosition() async throws {
-        // Because html comment is a inline element,
-        // something is causing the range to be wrong,
-        // check this later after cmark upgrade.
-        try XCTSkipIf(isCI)
-
         // given
         let input = "<!-- this -->\n"
 

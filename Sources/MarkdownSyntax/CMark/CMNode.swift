@@ -148,8 +148,8 @@ public extension CMNode {
     }
 
     /// The heading level.
-    var headingLevel: Int32 {
-        return cmark_node_get_heading_level(cmarkNode)
+    var headingLevel: Int {
+        Int(cmark_node_get_heading_level(cmarkNode))
     }
 
     /// The fenced code info.
@@ -190,8 +190,8 @@ public extension CMNode {
     }
 
     /// The list starting number.
-    var listStartingNumber: Int32 {
-        return cmark_node_get_list_start(cmarkNode)
+    var listStartingNumber: Int {
+        Int(cmark_node_get_list_start(cmarkNode))
     }
 
     /// The list tight.
@@ -236,23 +236,28 @@ public extension CMNode {
     }
 
     /// The start line.
-    var startLine: Int32 {
-        return cmark_node_get_start_line(cmarkNode)
+    var startLine: Int {
+        Int(cmark_node_get_start_line(cmarkNode))
     }
 
     /// The start column.
-    var startColumn: Int32 {
-        return cmark_node_get_start_column(cmarkNode)
+    var startColumn: Int {
+        Int(cmark_node_get_start_column(cmarkNode))
     }
 
     /// The end line.
-    var endLine: Int32 {
-        return cmark_node_get_end_line(cmarkNode)
+    var endLine: Int {
+        Int(cmark_node_get_end_line(cmarkNode))
     }
 
     /// The end column.
-    var endColumn: Int32 {
-        return cmark_node_get_end_column(cmarkNode)
+    var endColumn: Int {
+        Int(cmark_node_get_end_column(cmarkNode))
+    }
+
+    /// Backtick count for code.
+    var backtickCount: Int {
+        Int(cmark_node_get_backtick_count(cmarkNode))
     }
 
     /// Returns an iterator for the node.
