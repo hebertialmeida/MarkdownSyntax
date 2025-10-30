@@ -73,12 +73,11 @@ Once you have your Swift package set up, adding MarkdownSyntax as a dependency i
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/hebertialmeida/MarkdownSyntax", from: "1.2.1")
+    .package(url: "https://github.com/hebertialmeida/MarkdownSyntax", from: "1.3.0")
 ]
 ```
 
 ### Acknowledgements
 
-- [cmark](https://github.com/commonmark/cmark)
-- [GitHub cmark fork](https://github.com/github/cmark)
+- [swift-cmark](https://github.com/swiftlang/swift-cmark)
 - [libcmark_gfm](https://github.com/KristopherGBaker/libcmark_gfm)

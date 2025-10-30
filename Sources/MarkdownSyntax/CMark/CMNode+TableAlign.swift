@@ -7,6 +7,7 @@
 //
 
 import cmark_gfm
+import cmark_gfm_extensions
 
 extension CMNode {
     func getTableAlignments() -> [AlignType] {

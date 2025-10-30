@@ -9,13 +9,8 @@
 extension CMNode {
 
     func position(in text: String, using lineOffsets: [String.Index]) -> Position {
-        let startLine = Int(self.startLine)
-        let startColumn = Int(self.startColumn)
-        let endLine = Int(self.endLine)
-        let endColumn = Int(self.endColumn)
-
-        var startPoint = Point(line: startLine, column: startColumn, offset: nil)
-        var endPoint = Point(line: endLine, column: endColumn, offset: nil)
+        var startPoint = Point(line: startLine, column: startColumn - backtickCount, offset: nil)
+        var endPoint = Point(line: endLine, column: endColumn + backtickCount, offset: nil)
 
         func index(of point: Point) -> String.Index {
             let line = point.line > 0 ? point.line-1 : point.line
