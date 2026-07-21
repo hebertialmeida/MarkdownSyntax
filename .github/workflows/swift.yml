@@ -29,3 +29,11 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: lcov.info
+      # Sanitizer runs guard the hand-rolled cmark memory model (see the memory/leak/
+      # concurrency safety-harness tests). Run after coverage so they don't clobber the
+      # coverage build's profraw data. GitHub Actions sets CI=true, so the CI-gated
+      # position test stays skipped here.
+      - name: Run tests under Address Sanitizer
+        run: swift test --sanitize=address
+      - name: Run tests under Thread Sanitizer
+        run: swift test --sanitize=thread
