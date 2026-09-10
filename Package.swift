@@ -9,7 +9,7 @@ let package = Package(
         .library(name: "MarkdownSyntax", targets: ["MarkdownSyntax"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-cmark", .upToNextMajor(from: "0.7.1"))
+        .package(url: "https://github.com/swiftlang/swift-cmark", .upToNextMajor(from: "0.8.0"))
     ],
     targets: [
         .target(

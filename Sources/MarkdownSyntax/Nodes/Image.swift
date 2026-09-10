@@ -12,14 +12,28 @@ public struct Image: StaticPhrasingContent, PhrasingContent, Parent, Resource, A
     public let url: URL
     public let title: String?
     public let alt: String?
+
     public let children: [PhrasingContent]
     public let position: Position
 
-    public init(url: URL, title: String?, alt: String?, children: [PhrasingContent], position: Position) {
+    /// Position of the alt text between the brackets.
+    ///
+    /// A sub-range of ``position``. `nil` when the image has an empty label, such as `![](url)`.
+    public let labelPosition: Position?
+
+    public init(
+        url: URL,
+        title: String?,
+        alt: String?,
+        children: [PhrasingContent],
+        position: Position,
+        labelPosition: Position? = nil
+    ) {
         self.url = url
         self.title = title
         self.alt = alt
         self.children = children
         self.position = position
+        self.labelPosition = labelPosition
     }
 }
