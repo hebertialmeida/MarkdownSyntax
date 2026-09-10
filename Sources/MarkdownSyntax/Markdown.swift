@@ -92,13 +92,17 @@ public final actor Markdown {
                     let url = node.linkUrl, let title = node.linkTitle,
                     let children = parsePhrasingContent(node.children) as? [StaticPhrasingContent]
                 else { break }
-                items.append(Link(url: url, title: title, children: children, position: position(for: node)))
+                let kind = node.linkSyntax(in: text, using: lineOffsets).kind
+                // An autolink is its own label, so it has none of its own.
+                let label = kind == .autolink ? nil : labelPosition(from: children.first?.position, to: children.last?.position)
+                items.append(Link(url: url, title: title, kind: kind, children: children, position: position(for: node), labelPosition: label))
 
             case .image:
                 guard let url = node.linkUrl, let title = node.linkTitle else { break }
                 let children = parsePhrasingContent(node.children)
                 let alt = node.getAll(where: { $0.type == .text }).compactMap({$0.literal}).joined(separator: "")
-                items.append(Image(url: url, title: title, alt: alt, children: children, position: position(for: node)))
+                let label = labelPosition(from: children.first?.position, to: children.last?.position)
+                items.append(Image(url: url, title: title, alt: alt, children: children, position: position(for: node), labelPosition: label))
 
             case .footnoteReference:
                 guard let value = node.literal else { break }
@@ -203,10 +207,18 @@ public final actor Markdown {
 
     func position(for node: CMNode) -> Position {
         switch node.type {
-        case .link, .footnoteDefinition:
+        case .link, .footnoteDefinition, .text:
             return node.adjustedPosition(in: text, using: lineOffsets)
         default:
             return node.position(in: text, using: lineOffsets)
         }
+    }
+
+    /// Position spanning a node's children — the label between a link's or image's brackets.
+    ///
+    /// `nil` when there are no children, e.g. `[](url)`.
+    func labelPosition(from first: Position?, to last: Position?) -> Position? {
+        guard let first, let last else { return nil }
+        return Position(start: first.start, end: last.end, indent: nil)
     }
 }
