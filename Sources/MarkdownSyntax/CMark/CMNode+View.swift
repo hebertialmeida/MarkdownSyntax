@@ -23,6 +23,11 @@ struct CMNodeView {
         cmark_node_next(pointer).map(CMNodeView.init(pointer:))
     }
 
+    /// The previous sibling.
+    var previous: CMNodeView? {
+        cmark_node_previous(pointer).map(CMNodeView.init(pointer:))
+    }
+
     /// The parent node.
     var parent: CMNodeView? {
         cmark_node_parent(pointer).map(CMNodeView.init(pointer:))
@@ -56,6 +61,11 @@ struct CMNodeView {
     var type: CMNodeType {
         let pointerType = cmark_node_get_type(pointer)
         return CMNodeType(rawValue: pointerType.rawValue)
+    }
+
+    /// The raw cmark node type, which the extension lookup is keyed by.
+    var rawType: UInt32 {
+        cmark_node_get_type(pointer).rawValue
     }
 
     /// The human readable type.

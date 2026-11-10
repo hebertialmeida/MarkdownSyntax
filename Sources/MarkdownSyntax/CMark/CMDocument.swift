@@ -122,6 +122,11 @@ public extension CMDocument {
         try await node.renderHtml(options, extensions: extensions)
     }
 
+    /// Renders the document as HTML without suspending.
+    internal func renderHtmlNow() throws -> String {
+        try node.renderHtmlNow(options, extensions: extensions)
+    }
+
     /// Renders the document as XML.
     ///
     /// - Throws:

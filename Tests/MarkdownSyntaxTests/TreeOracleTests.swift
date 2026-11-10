@@ -109,7 +109,7 @@ final class TreeOracleTests: XCTestCase {
 }
 
 /// The line endings each fixture is checked with.
-private enum LineEnding: String, CaseIterable {
+enum LineEnding: String, CaseIterable {
     case lf, crlf, cr, mixed
 
     func apply(to text: String) -> String {

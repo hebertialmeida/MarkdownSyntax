@@ -21,6 +21,11 @@ public extension CMNode {
     /// - Returns:
     ///     The HTML as a string.
     func renderHtml(_ options: CMDocumentOption, extensions: CMExtensionOption) async throws -> String {
+        try renderHtmlNow(options, extensions: extensions)
+    }
+
+    /// Renders the node as HTML without suspending.
+    internal func renderHtmlNow(_ options: CMDocumentOption, extensions: CMExtensionOption) throws -> String {
         var htmlExtensions: UnsafeMutablePointer<cmark_llist>?
 
         if extensions.contains(.tagfilters), let tagfilter = cmark_find_syntax_extension("tagfilter") {

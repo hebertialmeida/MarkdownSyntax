@@ -68,7 +68,7 @@ public enum CMNodeExtensionType: Equatable, Sendable {
 }
 
 /// Represents a cmark node type.
-public enum CMNodeType: Equatable {
+public enum CMNodeType: Equatable, Sendable {
     case none
     case document
     case blockQuote

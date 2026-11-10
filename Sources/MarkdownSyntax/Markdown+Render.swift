@@ -11,23 +11,34 @@ public extension Markdown {
 
     /// Parses a AST
     ///
+    /// With syntax extensions, the tree is built on the first call and every call returns it.
+    ///
     /// - Returns:
     ///     A Swift AST (Abstract Syntax Tree).
     func parse() -> Root {
-        Root(
-            children: parseContent(document.node.view.children),
-            position: position(for: document.node.view)
-        )
+        buildTree().root
     }
 
     /// Renders the document as HTML.
+    ///
+    /// With syntax extensions, the HTML includes what each recognized node asked for through
+    /// ``ParseContext/wrapHTML(onEnter:onExit:)``, whether or not ``parse()`` ran before. For the
+    /// render the cmark tree in ``document`` holds the custom nodes that carry it, and after the
+    /// render it is cmark's own again, so the other renderers never see them.
     ///
     /// - Throws:
     ///     `CMDocumentError.renderError` if there is an error rendering the HTML.
     /// - Returns:
     ///     The HTML as a string.
     func renderHtml() async throws -> String {
-        try await document.renderHtml()
+        guard !syntax.isEmpty else {
+            return try await document.renderHtml()
+        }
+        // Synchronous from here to the revert, so no other call on this parser sees the tree
+        // with the custom nodes in it.
+        let applied = try ExtensionHTML.apply(buildTree().html)
+        defer { applied.revert() }
+        return try document.renderHtmlNow()
     }
 
     /// Renders the document as XML.
