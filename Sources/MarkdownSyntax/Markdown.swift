@@ -19,8 +19,35 @@ public final actor Markdown {
     /// The text parsed.
     let text: String
 
+    /// The cmark tree the parser reads and renders. With syntax extensions, ``renderHtml()`` puts
+    /// custom nodes in it for its render, so it is never handed out as ``document``.
+    var cmark: CMDocument
+
+    /// With syntax extensions, the cmark tree handed out as ``document``: a parse of its own.
+    private var heldDocument: CMDocument?
+
     /// The root node of the document.
-    public var document: CMDocument
+    ///
+    /// With syntax extensions, this is a cmark parse of the text of its own, made the first time
+    /// you read it, which the parser never changes: render or walk it from any task, also while
+    /// ``renderHtml()`` runs. Without them, it is the tree the parser reads and renders, as
+    /// before; set, the parser reads and renders the one you give.
+    public var document: CMDocument {
+        get {
+            guard !syntax.isEmpty else { return cmark }
+            if let heldDocument { return heldDocument }
+            do {
+                let parsed = try cmark.parsedAgain(text)
+                heldDocument = parsed
+                return parsed
+            } catch {
+                preconditionFailure("The text parsed once already, and failed to parse again: \(error)")
+            }
+        }
+        set {
+            if syntax.isEmpty { cmark = newValue } else { heldDocument = newValue }
+        }
+    }
 
     /// The syntax extensions, by anchor type.
     let syntax: SyntaxRegistry
@@ -71,7 +98,7 @@ public final actor Markdown {
         self.text = text
         self.footnoteIndex = startingFootnoteIndex
         self.lineOffsets = text.lineOffsets
-        self.document = try CMDocument(text: text, options: options, extensions: extensions)
+        self.cmark = try CMDocument(text: text, options: options, extensions: extensions)
         self.syntax = SyntaxRegistry(syntaxExtensions)
     }
 
@@ -82,8 +109,8 @@ public final actor Markdown {
         if let built { return built }
         let builder = TreeBuilder(text: text, lineOffsets: lineOffsets, footnoteIndex: footnoteIndex, syntax: syntax)
         let root = Root(
-            children: builder.content(from: document.node.view.firstChild),
-            position: builder.position(for: document.node.view)
+            children: builder.content(from: cmark.node.view.firstChild),
+            position: builder.position(for: cmark.node.view)
         )
         footnoteIndex = builder.footnoteIndex
         let result = (root: root, html: builder.htmlRequests)

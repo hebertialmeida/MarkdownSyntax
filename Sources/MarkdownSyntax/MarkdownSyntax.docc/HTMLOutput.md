@@ -28,12 +28,13 @@ that never renders, such as an editor's, never builds them.
 
 For the render, each request becomes a cmark custom node — a custom block for an anchor met as
 block content, a custom inline node for one met as phrasing content — that takes the nodes'
-place, with `onEnter` and `onExit` as its markup. After the render the tree in
-``Markdown/document`` is cmark's own again. Every renderer of a ``Markdown`` runs on it without
+place, with `onEnter` and `onExit` as its markup, in the parser's own cmark tree; after the
+render that tree is cmark's own again. Every renderer of a ``Markdown`` runs on it without
 suspending, so its other renderers never see the custom nodes, even when they're called from
-other tasks while ``Markdown/renderHtml()`` runs. A ``CMDocument`` you took from
-``Markdown/document`` isn't guarded that way: don't render or walk it from another task while
-``Markdown/renderHtml()`` runs.
+other tasks while ``Markdown/renderHtml()`` runs. With syntax extensions,
+``Markdown/document`` is not that tree but a cmark parse of the text of its own, made when you
+first read it: you can render or walk it from any task, also while ``Markdown/renderHtml()``
+runs.
 
 `onEnter` and `onExit` go into the HTML as they are: escape anything taken from the source.
 

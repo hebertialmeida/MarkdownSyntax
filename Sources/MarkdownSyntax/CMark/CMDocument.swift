@@ -109,6 +109,15 @@ public class CMDocument: @unchecked Sendable {
 
 }
 
+extension CMDocument {
+
+    /// `text` parsed as this document was, with its options and extensions: the same text gives
+    /// the same tree, node for node.
+    func parsedAgain(_ text: String) throws -> CMDocument {
+        try CMDocument(text: text, options: options, extensions: extensions)
+    }
+}
+
 /// Document rendering methods.
 public extension CMDocument {
 

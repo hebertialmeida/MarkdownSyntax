@@ -140,10 +140,9 @@ final class ConcurrencyTests: XCTestCase {
 
     // MARK: - Every renderer on one parser with syntax extensions
 
-    /// With syntax extensions, ``Markdown/renderHtml()`` puts custom nodes in the cmark tree for
-    /// its render and takes them out after. Every other renderer of the same parser runs on the
-    /// actor too, so none of them reads the tree while it holds custom nodes: each output is the
-    /// one a render on its own gives, and Thread Sanitizer sees no race.
+    /// With syntax extensions, ``Markdown/renderHtml()`` puts custom nodes in a cmark tree of its
+    /// render's own. Every other renderer of the same parser runs concurrently with it: each
+    /// output is the one a render on its own gives, and Thread Sanitizer sees no race.
     func testEveryRendererOfOneParserRunsWhileRenderHtmlChangesTheTree() async throws {
         let source = String(repeating: "Some ==marked== text.\n\nListing: Title\n\n    let x = 1\n\n> ==quoted==\n\n", count: 40)
         let markdown = try await Markdown(text: source, syntaxExtensions: [HighlightExtension(), ListingExtension()])
@@ -171,6 +170,36 @@ final class ConcurrencyTests: XCTestCase {
                     default: (output, expected) = (try await markdown.renderPlainText(width: 0), plain)
                     }
                     XCTAssertEqual(output, expected, "renderer \(i % 6)")
+                }
+            }
+            try await group.waitForAll()
+        }
+    }
+
+    /// `renderHtml()` never changes ``Markdown/document``: whoever holds it renders and walks it
+    /// while the parser renders its extensions' HTML, and reads cmark's own tree (D-15, N4).
+    func testTheDocumentIsNeverChangedWhileTheParserRendersItsHTML() async throws {
+        let source = (0..<40).map { "Some ==marked== text \($0).\n\nListing: \($0)\n\n```\ncode\n```\n" }.joined(separator: "\n")
+        let markdown = try await Markdown(text: source, syntaxExtensions: [HighlightExtension(), ListingExtension()])
+        let document = await markdown.document
+        let plain = try await Markdown(text: source).renderHtml()
+        let html = try await markdown.renderHtml()
+        XCTAssertTrue(html.contains("<mark>marked</mark>"))
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for i in 0..<100 {
+                group.addTask {
+                    if i.isMultiple(of: 2) {
+                        let output = try await markdown.renderHtml()
+                        XCTAssertEqual(output, html)
+                    } else {
+                        let output = try await document.renderHtml()
+                        XCTAssertEqual(output, plain, "the document as cmark made it")
+                        func custom(in node: CMNodeView) -> Int {
+                            node.children.reduce(node.type == .customBlock || node.type == .customInline ? 1 : 0) { $0 + custom(in: $1) }
+                        }
+                        XCTAssertEqual(custom(in: document.node.view), 0, "no custom node in the document")
+                    }
                 }
             }
             try await group.waitForAll()
