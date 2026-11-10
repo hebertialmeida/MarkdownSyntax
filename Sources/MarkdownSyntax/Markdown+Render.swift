@@ -24,7 +24,8 @@ public extension Markdown {
     /// With syntax extensions, the HTML includes what each recognized node asked for through
     /// ``ParseContext/wrapHTML(onEnter:onExit:)``, whether or not ``parse()`` ran before. For the
     /// render the cmark tree in ``document`` holds the custom nodes that carry it, and after the
-    /// render it is cmark's own again, so the other renderers never see them.
+    /// render it is cmark's own again. Every renderer of a parser runs on it without suspending,
+    /// so the other renderers never see the custom nodes, even when called concurrently.
     ///
     /// - Throws:
     ///     `CMDocumentError.renderError` if there is an error rendering the HTML.
@@ -32,10 +33,10 @@ public extension Markdown {
     ///     The HTML as a string.
     func renderHtml() async throws -> String {
         guard !syntax.isEmpty else {
-            return try await document.renderHtml()
+            return try document.renderHtmlNow()
         }
-        // Synchronous from here to the revert, so no other call on this parser sees the tree
-        // with the custom nodes in it.
+        // Synchronous from here to the revert, and every other renderer of this parser is
+        // synchronous on it too, so none of them sees the tree with the custom nodes in it.
         let applied = try ExtensionHTML.apply(buildTree().html)
         defer { applied.revert() }
         return try document.renderHtmlNow()
@@ -48,7 +49,7 @@ public extension Markdown {
     /// - Returns:
     ///     The XML as a string.
     func renderXml() async throws -> String {
-        try await document.renderXml()
+        try document.renderXmlNow()
     }
 
     /// Renders the document as groff man page.
@@ -60,7 +61,7 @@ public extension Markdown {
     /// - Returns:
     ///     The man page as a string.
     func renderMan(width: Int32) async throws -> String {
-        try await document.renderMan(width: width)
+        try document.renderManNow(width: width)
     }
 
     /// Renders the document as common mark.
@@ -72,7 +73,7 @@ public extension Markdown {
     /// - Returns:
     ///     The common mark as a string.
     func renderCommonMark(width: Int32) async throws -> String {
-        try await document.renderCommonMark(width: width)
+        try document.renderCommonMarkNow(width: width)
     }
 
     /// Renders the document as Latex.
@@ -84,7 +85,7 @@ public extension Markdown {
     /// - Returns:
     ///     The Latex as a string.
     func renderLatex(width: Int32) async throws -> String {
-        try await document.renderLatex(width: width)
+        try document.renderLatexNow(width: width)
     }
 
     /// Renders the document as plain text.
@@ -96,6 +97,6 @@ public extension Markdown {
     /// - Returns:
     ///     The plain text as a string.
     func renderPlainText(width: Int32) async throws -> String {
-        try await document.renderPlainText(width: width)
+        try document.renderPlainTextNow(width: width)
     }
 }

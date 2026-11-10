@@ -137,4 +137,43 @@ final class ConcurrencyTests: XCTestCase {
             }
         }
     }
+
+    // MARK: - Every renderer on one parser with syntax extensions
+
+    /// With syntax extensions, ``Markdown/renderHtml()`` puts custom nodes in the cmark tree for
+    /// its render and takes them out after. Every other renderer of the same parser runs on the
+    /// actor too, so none of them reads the tree while it holds custom nodes: each output is the
+    /// one a render on its own gives, and Thread Sanitizer sees no race.
+    func testEveryRendererOfOneParserRunsWhileRenderHtmlChangesTheTree() async throws {
+        let source = String(repeating: "Some ==marked== text.\n\nListing: Title\n\n    let x = 1\n\n> ==quoted==\n\n", count: 40)
+        let markdown = try await Markdown(text: source, syntaxExtensions: [HighlightExtension(), ListingExtension()])
+        let reference = try await Markdown(text: source)
+        let html = try await markdown.renderHtml()
+        let xml = try await reference.renderXml()
+        let commonMark = try await reference.renderCommonMark(width: 0)
+        let man = try await reference.renderMan(width: 0)
+        let latex = try await reference.renderLatex(width: 0)
+        let plain = try await reference.renderPlainText(width: 0)
+        XCTAssertTrue(html.contains("<mark>marked</mark>"))
+        XCTAssertTrue(html.contains("<figure class=\"listing\">"))
+        XCTAssertFalse(xml.contains("custom_"))
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for i in 0..<200 {
+                group.addTask {
+                    let (output, expected): (String, String)
+                    switch i % 6 {
+                    case 0: (output, expected) = (try await markdown.renderHtml(), html)
+                    case 1: (output, expected) = (try await markdown.renderXml(), xml)
+                    case 2: (output, expected) = (try await markdown.renderCommonMark(width: 0), commonMark)
+                    case 3: (output, expected) = (try await markdown.renderMan(width: 0), man)
+                    case 4: (output, expected) = (try await markdown.renderLatex(width: 0), latex)
+                    default: (output, expected) = (try await markdown.renderPlainText(width: 0), plain)
+                    }
+                    XCTAssertEqual(output, expected, "renderer \(i % 6)")
+                }
+            }
+            try await group.waitForAll()
+        }
+    }
 }

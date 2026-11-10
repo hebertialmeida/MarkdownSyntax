@@ -28,8 +28,10 @@ use it.
 For the render, each request becomes a cmark custom node — a custom block for an anchor met as
 block content, a custom inline node for one met as phrasing content — that takes the nodes'
 place, with `onEnter` and `onExit` as its markup. After the render the tree in
-``Markdown/document`` is cmark's own again, so the other renderers, and anything reading the cmark
-tree, never see the custom nodes. Don't read ``Markdown/document`` from another task while
+``Markdown/document`` is cmark's own again. Every renderer of a ``Markdown`` runs on it without
+suspending, so its other renderers never see the custom nodes, even when they're called from
+other tasks while ``Markdown/renderHtml()`` runs. A ``CMDocument`` you took from
+``Markdown/document`` isn't guarded that way: don't render or walk it from another task while
 ``Markdown/renderHtml()`` runs.
 
 `onEnter` and `onExit` go into the HTML as they are: escape anything taken from the source.

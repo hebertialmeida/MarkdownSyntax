@@ -56,6 +56,11 @@ public extension CMNode {
     /// - Returns:
     ///     The XML as a string.
     func renderXml(_ options: CMDocumentOption) async throws -> String {
+        try renderXmlNow(options)
+    }
+
+    /// Renders the node as XML without suspending.
+    internal func renderXmlNow(_ options: CMDocumentOption) throws -> String {
         guard let buffer = cmark_render_xml(cmarkNode, options.rawValue) else {
             throw CMDocumentError.renderError
         }
@@ -81,6 +86,11 @@ public extension CMNode {
     /// - Returns:
     ///     The man page as a string.
     func renderMan(_ options: CMDocumentOption, width: Int32) async throws -> String {
+        try renderManNow(options, width: width)
+    }
+
+    /// Renders the node as groff man page without suspending.
+    internal func renderManNow(_ options: CMDocumentOption, width: Int32) throws -> String {
         guard let buffer = cmark_render_man(cmarkNode, options.rawValue, width) else {
             throw CMDocumentError.renderError
         }
@@ -106,6 +116,11 @@ public extension CMNode {
     /// - Returns:
     ///     The common mark as a string.
     func renderCommonMark(_ options: CMDocumentOption, width: Int32) async throws -> String {
+        try renderCommonMarkNow(options, width: width)
+    }
+
+    /// Renders the node as common mark without suspending.
+    internal func renderCommonMarkNow(_ options: CMDocumentOption, width: Int32) throws -> String {
         guard let buffer = cmark_render_commonmark(cmarkNode, options.rawValue, width) else {
             throw CMDocumentError.renderError
         }
@@ -131,6 +146,11 @@ public extension CMNode {
     /// - Returns:
     ///     The Latex as a string.
     func renderLatex(_ options: CMDocumentOption, width: Int32) async throws -> String {
+        try renderLatexNow(options, width: width)
+    }
+
+    /// Renders the node as Latex without suspending.
+    internal func renderLatexNow(_ options: CMDocumentOption, width: Int32) throws -> String {
         guard let buffer = cmark_render_latex(cmarkNode, options.rawValue, width) else {
             throw CMDocumentError.renderError
         }
@@ -156,6 +176,11 @@ public extension CMNode {
     /// - Returns:
     ///     The plain text as a string.
     func renderPlainText(_ options: CMDocumentOption, width: Int32) async throws -> String {
+        try renderPlainTextNow(options, width: width)
+    }
+
+    /// Renders the node as plain text without suspending.
+    internal func renderPlainTextNow(_ options: CMDocumentOption, width: Int32) throws -> String {
         guard let buffer = cmark_render_plaintext(cmarkNode, options.rawValue, width) else {
             throw CMDocumentError.renderError
         }
