@@ -224,6 +224,19 @@ final class ExtensionTests: XCTestCase {
         XCTAssertEqual(html, "<ul>\n<li>\n<div>\n<p>a</p>\n</div>\n</li>\n<li>\n<div>\n<p>b</p>\n</div>\n</li>\n</ul>\n")
     }
 
+    func testTheHTMLIsBuiltOnlyWhenTheDocumentRenders() async throws {
+        // A parse that never renders, such as an editor's, builds none of the markup (D-14).
+        let source = "Some ==marked== text.\n\nA paragraph.\n"
+        let built = HTMLCounter()
+        let markdown = try await Markdown(text: source, options: [], syntaxExtensions: [CountingExtension(built: built)])
+        _ = await markdown.parse()
+        XCTAssertEqual(built.count, 0, "parsed, not rendered: no markup built")
+
+        let html = try await markdown.renderHtml()
+        XCTAssertEqual(html, "<div>\n<p>Some <mark>marked</mark> text.</p>\n</div>\n<div>\n<p>A paragraph.</p>\n</div>\n")
+        XCTAssertEqual(built.count, 6, "each wrap's onEnter and onExit, once per render")
+    }
+
     func testARecognizerThatReturnsNilLeavesNoClaimAndNoHTML() async throws {
         let source = "Listing: x\n\n```\ncode\n```\n\nText ==b==."
         let markdown = try await Markdown(text: source, syntaxExtensions: [RejectingExtension(claimAndWrap: true)])
@@ -362,6 +375,45 @@ private struct ShoutExtension: MarkdownExtension {
             let text = context.plainPhrasing(context.anchor)
         else { return nil }
         return [Shout(position: context.position(of: context.anchor), plain: [text])]
+    }
+}
+
+/// Counts the markup a ``CountingExtension`` builds.
+private final class HTMLCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var built = 0
+
+    var count: Int { lock.withLock { built } }
+
+    func markup(_ text: String) -> String {
+        lock.withLock { built += 1 }
+        return text
+    }
+}
+
+/// Wraps every paragraph in a `<div>` and every `==…==` in a `<mark>`, counting each piece of
+/// markup as it is built.
+private struct CountingExtension: MarkdownExtension {
+    let built: HTMLCounter
+    let anchors: [CMNodeType] = [.paragraph, .text]
+
+    func recognizeBlock(in context: inout ParseContext) -> [BlockContent]? {
+        guard let paragraph = context.plainBlock(context.anchor) else { return nil }
+        context.wrapHTML(onEnter: built.markup("<div>"), onExit: built.markup("</div>"))
+        return [paragraph]
+    }
+
+    func recognizePhrasing(in context: inout ParseContext) -> [PhrasingContent]? {
+        let source = context.source
+        guard
+            let range = context.range(of: context.anchor),
+            let open = source.range(of: "==", range: range),
+            let close = source.range(of: "==", range: open.upperBound..<range.upperBound),
+            let text = context.plainPhrasing(context.anchor)
+        else { return nil }
+        context.wrapHTML(open.upperBound..<close.lowerBound, in: open.lowerBound..<close.upperBound,
+                         onEnter: built.markup("<mark>"), onExit: built.markup("</mark>"))
+        return [text]
     }
 }
 

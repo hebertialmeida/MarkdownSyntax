@@ -37,7 +37,7 @@ public extension Markdown {
         }
         // Synchronous from here to the revert, and every other renderer of this parser is
         // synchronous on it too, so none of them sees the tree with the custom nodes in it.
-        let applied = try ExtensionHTML.apply(buildTree().html)
+        let applied = try ExtensionHTML.apply(buildTree().html, source: text)
         defer { applied.revert() }
         return try document.renderHtmlNow()
     }

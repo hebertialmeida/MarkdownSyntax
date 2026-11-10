@@ -9,18 +9,19 @@ import cmark_gfm
 /// after, so the tree stays cmark's own for every other reader and renderer.
 enum ExtensionHTML {
 
-    /// What takes a run of text nodes' place for the render.
+    /// What takes a run of text nodes' place for the render: ranges of the source, and the HTML
+    /// around them evaluated only when the document renders.
     enum Piece {
-        /// Text rendered as cmark renders text.
-        case text(String)
-        /// A custom inline node: `onEnter`, the content rendered as text, `onExit`.
-        case custom(onEnter: String, onExit: String, content: String)
+        /// The source's text there, rendered as cmark renders text.
+        case text(Range<String.Index>)
+        /// A custom inline node: `onEnter`, the source's text there rendered as text, `onExit`.
+        case custom(onEnter: () -> String, onExit: () -> String, content: Range<String.Index>)
     }
 
     /// How a recognized anchor's nodes render.
     enum Kind {
         /// Inside one custom node.
-        case wrap(onEnter: String, onExit: String)
+        case wrap(onEnter: () -> String, onExit: () -> String)
         /// Replaced by these pieces (text nodes only).
         case split([Piece])
     }
@@ -69,12 +70,13 @@ enum ExtensionHTML {
         }
     }
 
-    /// Applies every request. On a failure the tree is put back and the error thrown.
-    static func apply(_ requests: [Request]) throws -> Applied {
+    /// Applies every request, its pieces read from `source`, the text parsed. On a failure the
+    /// tree is put back and the error thrown.
+    static func apply(_ requests: [Request], source: String) throws -> Applied {
         var applied = Applied()
         for request in requests {
             do {
-                applied.steps.append(try apply(request))
+                applied.steps.append(try apply(request, source: source))
             } catch {
                 applied.revert()
                 throw error
@@ -83,13 +85,13 @@ enum ExtensionHTML {
         return applied
     }
 
-    private static func apply(_ request: Request) throws -> Step {
+    private static func apply(_ request: Request, source: String) throws -> Step {
         let anchor = request.anchor
         guard let mem = anchor.pointee.content.mem else { throw CMDocumentError.renderError }
 
         switch request.kind {
         case let .wrap(onEnter, onExit):
-            let wrapper = try custom(request.isBlock ? CMARK_NODE_CUSTOM_BLOCK : CMARK_NODE_CUSTOM_INLINE, onEnter, onExit, mem)
+            let wrapper = try custom(request.isBlock ? CMARK_NODE_CUSTOM_BLOCK : CMARK_NODE_CUSTOM_INLINE, onEnter(), onExit(), mem)
             guard cmark_node_insert_before(anchor, wrapper) == 1 else {
                 cmark_node_free(wrapper)
                 throw CMDocumentError.renderError
@@ -106,13 +108,13 @@ enum ExtensionHTML {
             do {
                 for piece in pieces {
                     switch piece {
-                    case let .text(literal):
-                        created.append(try text(literal, mem))
+                    case let .text(range):
+                        created.append(try text(String(source[range]), mem))
                     case let .custom(onEnter, onExit, content):
-                        let node = try custom(CMARK_NODE_CUSTOM_INLINE, onEnter, onExit, mem)
+                        let node = try custom(CMARK_NODE_CUSTOM_INLINE, onEnter(), onExit(), mem)
                         created.append(node)
                         if !content.isEmpty {
-                            let child = try text(content, mem)
+                            let child = try text(String(source[content]), mem)
                             guard cmark_node_append_child(node, child) == 1 else {
                                 cmark_node_free(child)
                                 throw CMDocumentError.renderError

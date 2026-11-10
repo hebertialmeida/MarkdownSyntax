@@ -16,7 +16,8 @@ public final actor Markdown {
 
     private var lineOffsets: [String.Index] = []
 
-    private var text = ""
+    /// The text parsed.
+    let text: String
 
     /// The root node of the document.
     public var document: CMDocument

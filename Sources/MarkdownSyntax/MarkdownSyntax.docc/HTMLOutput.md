@@ -21,7 +21,8 @@ context.wrapHTML(content, in: syntax, onEnter: "<mark>", onExit: "</mark>")
 
 Both are kept only if the recognizer returns nodes, and ``Markdown/renderHtml()`` includes them
 whether or not ``Markdown/parse()`` ran first: with extensions, the tree is built once and both
-use it.
+use it. `onEnter` and `onExit` are evaluated only when the document renders HTML, so a parse
+that never renders, such as an editor's, never builds them.
 
 ## How it renders
 

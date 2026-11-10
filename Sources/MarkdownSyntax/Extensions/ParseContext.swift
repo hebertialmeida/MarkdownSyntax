@@ -82,7 +82,7 @@ public struct ParseContext {
     /// The nodes the HTML asked for in this call covers (the anchor and the siblings claimed),
     /// and what it asked for. Committed only if the recognizer returns nodes.
     private var htmlNodes: [CMNodeView]?
-    private var htmlWrap: (onEnter: String, onExit: String)?
+    private var htmlWrap: (onEnter: () -> String, onExit: () -> String)?
     private var htmlSplit: (run: Range<String.Index>, end: String.Index, pieces: [ExtensionHTML.Piece])?
 
     /// The anchor's own reading, once a recognizer asked for it, so it is built once.
@@ -229,10 +229,13 @@ public struct ParseContext {
     /// custom inline node (met as phrasing content), and come out of it after. See
     /// <doc:HTMLOutput>.
     ///
+    /// `onEnter` and `onExit` are evaluated only when the document is rendered, so a parse that
+    /// never renders HTML never builds them.
+    ///
     /// - Returns: `false`, and nothing is asked for, when HTML was already asked for in this call
     ///   or the anchor's parent can't contain a custom node (a GFM table cell can't).
     @discardableResult
-    public mutating func wrapHTML(onEnter: String, onExit: String) -> Bool {
+    public mutating func wrapHTML(onEnter: @autoclosure @escaping () -> String, onExit: @autoclosure @escaping () -> String) -> Bool {
         let nodes = [anchor.view] + claimed.map(\.view)
         guard htmlNodes == nil, builder.canWrap(nodes[0], inBlock: isBlock) else { return false }
         htmlNodes = nodes
@@ -248,6 +251,9 @@ public struct ParseContext {
     /// text around renders as before. Call it once for each occurrence, in source order. See
     /// <doc:HTMLOutput>.
     ///
+    /// `onEnter` and `onExit` are evaluated only when the document is rendered, so a parse that
+    /// never renders HTML never builds them.
+    ///
     /// - Returns: `false`, and nothing is asked for, unless the anchor was met as phrasing
     ///   content; the anchor and the siblings claimed so far are adjacent text nodes whose
     ///   literal is their source (no entity or escape inside); `syntax` lies in their source
@@ -257,8 +263,8 @@ public struct ParseContext {
     public mutating func wrapHTML(
         _ content: Range<String.Index>,
         in syntax: Range<String.Index>,
-        onEnter: String,
-        onExit: String
+        onEnter: @autoclosure @escaping () -> String,
+        onExit: @autoclosure @escaping () -> String
     ) -> Bool {
         guard !isBlock, htmlWrap == nil else { return false }
         if htmlSplit == nil {
@@ -273,11 +279,10 @@ public struct ParseContext {
             syntax.lowerBound <= content.lowerBound, content.upperBound <= syntax.upperBound
         else { return false }
 
-        let text = builder.text
         if split.end < syntax.lowerBound {
-            split.pieces.append(.text(String(text[split.end..<syntax.lowerBound])))
+            split.pieces.append(.text(split.end..<syntax.lowerBound))
         }
-        split.pieces.append(.custom(onEnter: onEnter, onExit: onExit, content: String(text[content])))
+        split.pieces.append(.custom(onEnter: onEnter, onExit: onExit, content: content))
         split.end = syntax.upperBound
         htmlSplit = split
         return true
@@ -292,7 +297,7 @@ public struct ParseContext {
         }
         guard var split = htmlSplit, !split.pieces.isEmpty else { return nil }
         if split.end < split.run.upperBound {
-            split.pieces.append(.text(String(builder.text[split.end..<split.run.upperBound])))
+            split.pieces.append(.text(split.end..<split.run.upperBound))
         }
         return ExtensionHTML.Request(nodes: nodes, isBlock: false, kind: .split(split.pieces))
     }
