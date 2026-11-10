@@ -76,6 +76,23 @@ final class TreeOracleTests: XCTestCase {
         return digests
     }
 
+    func testLineOffsetsCountCRLFAsOneBreakAndLoneCROrLFAsOne() {
+        let cases: [(text: String, lineStarts: [Int])] = [
+            ("", [0]),
+            ("x", [0]),
+            ("line\n", [0, 5]),
+            ("a\r\nb\rc\nd", [0, 3, 5, 7]),
+            ("\r\r\n\n", [0, 1, 3, 4]),
+            ("é\r\n🇧🇷\n\r", [0, 4, 13, 14]),
+            ("a\u{0301}\r\nb", [0, 5]),
+            ("\n\u{0301}x", [0, 1]),
+        ]
+        for (text, lineStarts) in cases {
+            let offsets = text.lineOffsets.map { text.utf8.distance(from: text.utf8.startIndex, to: $0) }
+            XCTAssertEqual(offsets, lineStarts, "\(text.debugDescription)")
+        }
+    }
+
     func testDumpNamesEveryNodeWithItsSourceRangeInUTF8Bytes() async throws {
         let text = "é **b**\r\n"
         let dump = TreeDump.dump(try await Markdown(text: text).parse(), in: text)
