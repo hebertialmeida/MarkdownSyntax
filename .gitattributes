@@ -1,0 +1,2 @@
+# The tree oracle compares bytes: never convert line endings in its fixtures.
+Tests/MarkdownSyntaxTests/Fixtures/** -text
