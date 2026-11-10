@@ -67,6 +67,83 @@ final class TreeOracleTests: XCTestCase {
         }
     }
 
+    /// Short documents that each end in a different block or inline, with no newline after the
+    /// last line: the last node's end is then the end of the text, not a line break.
+    private static let noFinalNewline: [(name: String, text: String)] = [
+        ("paragraph-multibyte", "Intro.\n\nCafé 🇧🇷 *fin*"),
+        ("heading-atx", "Text.\n\n## Título"),
+        ("heading-setext", "Título\n======"),
+        ("list-item", "- one\n- two **é**"),
+        ("ordered-nested", "1. one\n   - inner `code`"),
+        ("quote-nested", "> outer\n> > [!note] inner é"),
+        ("quote-in-list", "- item\n\n  > quoted"),
+        ("table", "| a | b |\n| - | - |\n| é | 2 |"),
+        ("fence-closed", "```swift\nlet x = 1\n```"),
+        ("fence-unclosed", "```\nlet x = 1"),
+        ("indented-code", "Text.\n\n    code line"),
+        ("html-block", "<div>\nhtml é\n</div>"),
+        ("thematic-break", "Text.\n\n---"),
+        ("footnote-definition", "Text[^1].\n\n[^1]: The note é"),
+        ("hard-break", "line one\\\nline two"),
+        ("link-and-image", "[link](https://example.com) ![alt](a.png)"),
+        ("trailing-spaces", "Text.   "),
+    ]
+    private static let noFinalNewlineFile = "no-final-newline.tree"
+
+    /// The fixtures again with their trailing newlines removed, and the short documents above:
+    /// the last line of each has no line break, in every line ending.
+    func testTreeMatchesRecordedOracleWhenTheLastLineHasNoNewline() async throws {
+        let record = ProcessInfo.processInfo.environment["MARKDOWNSYNTAX_RECORD_ORACLE"] == "1"
+        let directory = try XCTUnwrap(Bundle.module.url(forResource: "Fixtures", withExtension: nil))
+        let sourceDirectory = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("Fixtures")
+        let digestsURL = (record ? sourceDirectory : directory).appendingPathComponent(Self.digestsFile)
+        let digests = record ? [:] : try Self.readDigests(at: digestsURL)
+        var recordedDigests: [String] = []
+
+        for name in Self.dumped + Self.digested {
+            var source = try String(contentsOf: directory.appendingPathComponent("\(name).md"), encoding: .utf8)
+            while source.hasSuffix("\n") { source.removeLast() }
+            for ending in LineEnding.allCases {
+                let text = ending.apply(to: source)
+                let dump = TreeDump.dump(try await Markdown(text: text).parse(), in: text)
+                let file = "\(name).\(ending.rawValue).no-final-newline.tree"
+                if record {
+                    recordedDigests.append("\(file) \(TreeDump.digest(dump))")
+                } else if TreeDump.digest(dump) != digests[file] {
+                    let actual = FileManager.default.temporaryDirectory.appendingPathComponent(file)
+                    try dump.write(to: actual, atomically: true, encoding: .utf8)
+                    XCTFail("\(file) differs from the recorded tree; this run's dump is at \(actual.path)")
+                }
+            }
+        }
+
+        var dumps = ""
+        for (name, source) in Self.noFinalNewline {
+            for ending in LineEnding.allCases {
+                let text = ending.apply(to: source)
+                dumps += "## \(name).\(ending.rawValue)\n"
+                dumps += TreeDump.dump(try await Markdown(text: text).parse(), in: text)
+            }
+        }
+
+        if record {
+            try dumps.write(to: sourceDirectory.appendingPathComponent(Self.noFinalNewlineFile), atomically: true, encoding: .utf8)
+            // The other test's digests stay first, in their order.
+            let kept = try String(contentsOf: digestsURL, encoding: .utf8).split(separator: "\n")
+                .filter { !$0.contains(".no-final-newline.tree ") }.map(String.init)
+            let contents = (kept + recordedDigests).joined(separator: "\n") + "\n"
+            try contents.write(to: digestsURL, atomically: true, encoding: .utf8)
+            return
+        }
+
+        let expected = try String(contentsOf: directory.appendingPathComponent(Self.noFinalNewlineFile), encoding: .utf8)
+        if dumps != expected {
+            let actual = FileManager.default.temporaryDirectory.appendingPathComponent(Self.noFinalNewlineFile)
+            try dumps.write(to: actual, atomically: true, encoding: .utf8)
+            XCTFail("\(Self.noFinalNewlineFile) differs from the recorded trees; this run's dump is at \(actual.path)")
+        }
+    }
+
     private static func readDigests(at url: URL) throws -> [String: String] {
         var digests: [String: String] = [:]
         for line in try String(contentsOf: url, encoding: .utf8).split(separator: "\n") {
