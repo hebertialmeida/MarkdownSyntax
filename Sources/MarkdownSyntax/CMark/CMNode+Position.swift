@@ -6,7 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
-extension CMNode {
+extension CMNodeView {
 
     func position(in text: String, using lineOffsets: [String.Index]) -> Position {
         var startPoint = Point(line: startLine, column: startColumn - backtickCount, offset: nil)
@@ -47,6 +47,22 @@ extension CMNode {
         endPoint = Point(line: endLine, column: endColumn, offset: end)
         return Position(start: startPoint, end: endPoint, indent: nil)
     }
+
+    func getAll(where predicate: (CMNodeView) -> Bool) -> [CMNodeView] {
+        var nodes: [CMNodeView] = []
+
+        for c in children {
+            if predicate(c) {
+                nodes.append(c)
+            }
+            nodes.append(contentsOf: c.getAll(where: predicate))
+        }
+
+        return nodes
+    }
+}
+
+extension CMNode {
 
     /// When visiting a node, you can modify the state, and the modified state gets passed on to all children.
     func visitAll(_ callback: (CMNode) -> ()) {

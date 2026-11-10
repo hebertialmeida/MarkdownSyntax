@@ -41,7 +41,7 @@ public final actor Markdown {
 
     // MARK: Internal parsing
 
-    func parseContent(_ nodes: [CMNode]) -> [Content] {
+    func parseContent(_ nodes: some Sequence<CMNodeView>) -> [Content] {
         var items = [Content]()
 
         for node in nodes {
@@ -53,13 +53,13 @@ public final actor Markdown {
                 items.append(FootnoteDefinition(identifier: value, label: value, children: children, position: position(for: node)))
 
             default:
-                items.append(contentsOf: parseBlockContent([node]))
+                items.append(contentsOf: parseBlockContent(CollectionOfOne(node)))
             }
         }
         return items
     }
 
-    func parsePhrasingContent(_ nodes: [CMNode]) -> [PhrasingContent] {
+    func parsePhrasingContent(_ nodes: some Sequence<CMNodeView>) -> [PhrasingContent] {
         var items = [PhrasingContent]()
 
         for node in nodes {
@@ -119,7 +119,7 @@ public final actor Markdown {
         return items
     }
 
-    func parseTableContent(_ nodes: [CMNode]) -> [TableContent] {
+    func parseTableContent(_ nodes: some Sequence<CMNodeView>) -> [TableContent] {
         var items = [TableContent]()
 
         for node in nodes {
@@ -135,7 +135,7 @@ public final actor Markdown {
         return items
     }
 
-    func parseRowContent(_ nodes: [CMNode]) -> [RowContent] {
+    func parseRowContent(_ nodes: some Sequence<CMNodeView>) -> [RowContent] {
         var items = [RowContent]()
 
         for node in nodes where node.type == .extension(.tableCell) {
@@ -145,7 +145,7 @@ public final actor Markdown {
         return items
     }
 
-    func parseListContent(_ nodes: [CMNode], spread: Bool?) -> [ListContent] {
+    func parseListContent(_ nodes: some Sequence<CMNodeView>, spread: Bool?) -> [ListContent] {
         var items = [ListContent]()
 
         for node in nodes where node.type == .item {
@@ -155,7 +155,7 @@ public final actor Markdown {
         return items
     }
 
-    func parseBlockContent(_ nodes: [CMNode]) -> [BlockContent] {
+    func parseBlockContent(_ nodes: some Sequence<CMNodeView>) -> [BlockContent] {
         var items = [BlockContent]()
 
         for node in nodes {
@@ -205,7 +205,7 @@ public final actor Markdown {
 
     // MARK: Position
 
-    func position(for node: CMNode) -> Position {
+    func position(for node: CMNodeView) -> Position {
         switch node.type {
         case .link, .footnoteDefinition, .text:
             return node.adjustedPosition(in: text, using: lineOffsets)

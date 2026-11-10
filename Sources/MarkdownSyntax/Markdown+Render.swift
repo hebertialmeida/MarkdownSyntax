@@ -15,8 +15,8 @@ public extension Markdown {
     ///     A Swift AST (Abstract Syntax Tree).
     func parse() -> Root {
         Root(
-            children: parseContent(document.node.children),
-            position: position(for: document.node)
+            children: parseContent(document.node.view.children),
+            position: position(for: document.node.view)
         )
     }
 
