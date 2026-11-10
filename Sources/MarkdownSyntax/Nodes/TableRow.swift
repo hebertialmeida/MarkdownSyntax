@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// One row of a GFM table; the first is the header row.
 public struct TableRow: TableContent, Parent {
     public let isHeader: Bool
     public let children: [RowContent]

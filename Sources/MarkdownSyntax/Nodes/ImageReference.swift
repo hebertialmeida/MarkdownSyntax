@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// An image through a definition: `![alt][id]`.
 public struct ImageReference: StaticPhrasingContent, PhrasingContent, Parent, Reference, Alternative {
     public let referenceType: ReferenceType
     public let alt: String?

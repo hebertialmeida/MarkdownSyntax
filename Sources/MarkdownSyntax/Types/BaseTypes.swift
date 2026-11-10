@@ -32,20 +32,24 @@ public protocol Literal: Node {
 
 // MARK: - Mixin
 
+/// A node that points at a resource: a link or an image destination, with an optional title.
 public protocol Resource {
     var url: URL { get }
     var title: String? { get }
 }
 
+/// A node that is linked to another by an identifier, such as a footnote and its definition.
 public protocol Association {
     var identifier: String { get }
     var label: String? { get }
 }
 
+/// A node that refers to a definition elsewhere in the document.
 public protocol Reference {
     var referenceType: ReferenceType { get }
 }
 
+/// A node with alternative text, read in place of an image.
 public protocol Alternative {
     var alt: String? { get }
 }

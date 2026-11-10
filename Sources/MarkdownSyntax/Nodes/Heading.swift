@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A heading: `# Title` (ATX) or a line underlined with `=` or `-` (setext).
 public struct Heading: BlockContent, Parent {
     public let children: [PhrasingContent]
     public let depth: Depth
@@ -19,6 +20,7 @@ public struct Heading: BlockContent, Parent {
 }
 
 public extension Heading {
+    /// The heading level, `h1` to `h6`.
     enum Depth: Int, Codable, Sendable {
         case h1 = 1
         case h2 = 2

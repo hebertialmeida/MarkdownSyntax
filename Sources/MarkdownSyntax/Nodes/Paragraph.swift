@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A paragraph of running text.
 public struct Paragraph: BlockContent, Parent {
     public let children: [PhrasingContent]
     public let position: Position

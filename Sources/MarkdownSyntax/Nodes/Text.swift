@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A run of text, its entities and escapes resolved in `value`.
 public struct Text: StaticPhrasingContent, PhrasingContent, Literal {
     public let value: String
     public let position: Position

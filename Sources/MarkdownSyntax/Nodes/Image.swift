@@ -8,6 +8,7 @@
 
 import struct Foundation.URL
 
+/// An image: `![alt](source "title")`.
 public struct Image: StaticPhrasingContent, PhrasingContent, Parent, Resource, Alternative {
     public let url: URL
     public let title: String?

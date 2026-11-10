@@ -28,7 +28,7 @@ public final class CMNode: @unchecked Sendable {
     ///
     /// - Parameters:
     ///     - cmarkNode: The underlying cmark node pointer.
-    ///     - memoryOwner: indicates who really owns thememory.
+    ///     - potentialMemoryOwner: indicates who really owns thememory.
     ///          if this is nil, then this node really owns the memory,
     ///          and it should be freed when this node goes away.
     /// - Returns:

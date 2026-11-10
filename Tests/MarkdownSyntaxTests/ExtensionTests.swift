@@ -218,6 +218,12 @@ final class ExtensionTests: XCTestCase {
         XCTAssertEqual(html, expected)
     }
 
+    func testAWrappedParagraphInATightListRendersAsThoughTheCustomNodeWereItsParent() async throws {
+        // As the HTML article says: cmark reads a paragraph's tightness from its grandparent.
+        let html = try await Markdown(text: "- a\n- b\n", options: [], syntaxExtensions: [DivExtension()]).renderHtml()
+        XCTAssertEqual(html, "<ul>\n<li>\n<div>\n<p>a</p>\n</div>\n</li>\n<li>\n<div>\n<p>b</p>\n</div>\n</li>\n</ul>\n")
+    }
+
     func testARecognizerThatReturnsNilLeavesNoClaimAndNoHTML() async throws {
         let source = "Listing: x\n\n```\ncode\n```\n\nText ==b==."
         let markdown = try await Markdown(text: source, syntaxExtensions: [RejectingExtension(claimAndWrap: true)])
@@ -356,5 +362,16 @@ private struct ShoutExtension: MarkdownExtension {
             let text = context.plainPhrasing(context.anchor)
         else { return nil }
         return [Shout(position: context.position(of: context.anchor), plain: [text])]
+    }
+}
+
+/// Renders every paragraph inside a `<div>`, and keeps it as it is in the tree.
+private struct DivExtension: MarkdownExtension {
+    let anchors: [CMNodeType] = [.paragraph]
+
+    func recognizeBlock(in context: inout ParseContext) -> [BlockContent]? {
+        guard let paragraph = context.plainBlock(context.anchor) else { return nil }
+        context.wrapHTML(onEnter: "<div>", onExit: "</div>")
+        return [paragraph]
     }
 }

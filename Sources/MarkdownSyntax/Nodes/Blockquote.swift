@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A block quote: lines written after `>`.
 public struct Blockquote: BlockContent, Parent {
     public let children: [BlockContent]
     public let position: Position

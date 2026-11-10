@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A thematic break: `---`, `***` or `___` on a line of its own.
 public struct ThematicBreak: BlockContent {
     public let position: Position
 

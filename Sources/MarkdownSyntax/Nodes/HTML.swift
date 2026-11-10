@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// Raw HTML, as a block or inline in text.
 public struct HTML: BlockContent, StaticPhrasingContent, PhrasingContent, Literal {
     public let value: String
     public let position: Position

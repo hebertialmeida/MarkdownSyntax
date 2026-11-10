@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A code span: text between backticks.
 public struct InlineCode: StaticPhrasingContent, PhrasingContent, Literal {
     public let value: String
     public let position: Position

@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A code block, fenced or indented, with the info string of a fenced one as `language`.
 public struct Code: BlockContent, Literal {
     public let value: String
     public let language: String?

@@ -8,6 +8,7 @@
 
 import struct Foundation.URL
 
+/// A hyperlink: `[label](destination "title")`, a reference link or an autolink.
 public struct Link: PhrasingContent, Parent, Resource {
     public let url: URL
     public let title: String?

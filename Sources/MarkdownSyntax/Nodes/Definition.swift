@@ -8,6 +8,7 @@
 
 import struct Foundation.URL
 
+/// A link reference definition: `[id]: destination "title"`.
 public struct Definition: DefinitionContent, Association, Resource {
     public let identifier: String
     public let label: String?
