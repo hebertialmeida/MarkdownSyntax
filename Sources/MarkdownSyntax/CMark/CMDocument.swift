@@ -136,6 +136,11 @@ public extension CMDocument {
         try node.renderHtmlNow(options, extensions: extensions)
     }
 
+    /// Renders one node of the document, and what it holds, as HTML without suspending.
+    internal func renderHtmlNow(_ view: CMNodeView) throws -> String {
+        try CMNode.renderHtmlNow(view.pointer, options, extensions: extensions)
+    }
+
     /// Renders the document as XML.
     ///
     /// - Throws:

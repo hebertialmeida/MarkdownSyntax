@@ -119,6 +119,76 @@ public final actor Markdown {
     }
 }
 
+public extension Markdown {
+
+    /// Renders nodes of the tree as HTML, each as cmark renders it in the document, one after
+    /// another.
+    ///
+    /// For HTML of part of the document without parsing it again, such as an image's label set
+    /// as a caption: `renderHtml(of: image.children)` is `A <em>red</em> fox` where the
+    /// image's `alt` is `A red fox`. The nodes are found in cmark's tree by their kind and
+    /// position, and rendered as cmark renders them with no syntax extension: what an extension
+    /// asked of ``renderHtml()`` is not in it. An extension's node renders as its
+    /// ``ExtensionContent/plain`` nodes.
+    ///
+    /// - Parameter nodes: Nodes of this parser's tree.
+    /// - Throws:
+    ///     `CMDocumentError.renderError` if a node isn't in this parser's tree, or there is an
+    ///     error rendering the HTML.
+    /// - Returns:
+    ///     The HTML as a string.
+    func renderHtml(of nodes: [Node]) async throws -> String {
+        let targets = nodes.flatMap(Self.plainNodes)
+        guard !targets.isEmpty else { return "" }
+        let builder = TreeBuilder(text: text, lineOffsets: lineOffsets, footnoteIndex: 0, syntax: SyntaxRegistry([]))
+        var wanted = [(kinds: [NodeKind], position: Position)]()
+        for node in targets {
+            let kinds = NodeKind.kinds(of: node)
+            guard !kinds.isEmpty else { throw CMDocumentError.renderError }
+            wanted.append((kinds, node.position))
+        }
+        let kinds = Set(wanted.flatMap(\.kinds))
+        var found = [UnsafeMutablePointer<cmark_node>?](repeating: nil, count: wanted.count)
+        var remaining = wanted.count
+
+        // One walk of cmark's tree, depth first, from the document.
+        var cursor: CMNodeView? = cmark.node.view
+        while let node = cursor, remaining > 0 {
+            if let kind = NodeKind(node.type), kinds.contains(kind) {
+                let position = builder.position(for: node)
+                for index in wanted.indices where found[index] == nil && wanted[index].kinds.contains(kind) && wanted[index].position == position {
+                    found[index] = node.pointer
+                    remaining -= 1
+                    break
+                }
+            }
+            if let child = node.firstChild {
+                cursor = child
+            } else {
+                var up: CMNodeView? = node
+                cursor = nil
+                while let current = up {
+                    if let next = current.next { cursor = next; break }
+                    up = current.parent
+                }
+            }
+        }
+
+        var html = ""
+        for pointer in found {
+            guard let pointer else { throw CMDocumentError.renderError }
+            html += try cmark.renderHtmlNow(CMNodeView(pointer: pointer))
+        }
+        return html
+    }
+
+    /// A node as cmark made it: an extension's node is its plain nodes.
+    private static func plainNodes(_ node: Node) -> [Node] {
+        if let node = node as? ExtensionContent { return node.plain.flatMap(plainNodes) }
+        return [node]
+    }
+}
+
 /// Builds the Swift tree from cmark's, in one walk, offering each anchor to its extensions.
 ///
 /// One builder serves one build, inside the parser's isolation.

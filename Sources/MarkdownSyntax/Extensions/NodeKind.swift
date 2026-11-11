@@ -133,4 +133,36 @@ extension NodeKind {
         case .none, .customBlock, .customInline, .extension(.other): return nil
         }
     }
+
+    /// The kinds of cmark node a node of the tree can be read from: one, or for ``HTML``, which
+    /// stands for both, a block and an inline. Empty for a node cmark has none for, such as an
+    /// extension's.
+    static func kinds(of node: Node) -> [NodeKind] {
+        switch node {
+        case is Root: [.root]
+        case is Blockquote: [.blockquote]
+        case is List: [.list]
+        case is ListItem: [.listItem]
+        case is Code: [.code]
+        case is HTML: [.html, .inlineHTML]
+        case is Paragraph: [.paragraph]
+        case is Heading: [.heading]
+        case is ThematicBreak: [.thematicBreak]
+        case is FootnoteDefinition: [.footnoteDefinition]
+        case is Table: [.table]
+        case is TableRow: [.tableRow]
+        case is TableCell: [.tableCell]
+        case is Text: [.text]
+        case is SoftBreak: [.softBreak]
+        case is Break: [.lineBreak]
+        case is InlineCode: [.inlineCode]
+        case is Emphasis: [.emphasis]
+        case is Strong: [.strong]
+        case is Delete: [.delete]
+        case is Link, is LinkReference: [.link]
+        case is Image, is ImageReference: [.image]
+        case is FootnoteReference: [.footnoteReference]
+        default: []
+        }
+    }
 }

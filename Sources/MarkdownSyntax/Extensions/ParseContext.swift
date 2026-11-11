@@ -84,6 +84,8 @@ public struct ParseContext {
     private var htmlNodes: [CMNodeView]?
     private var htmlWrap: (onEnter: () -> String, onExit: () -> String)?
     private var htmlSplit: (run: Range<String.Index>, end: String.Index, pieces: [ExtensionHTML.Piece])?
+    /// For ``omitHTML(_:)``: the text the last sibling claimed keeps after the syntax, if any.
+    private var htmlOmit: String??
 
     /// The anchor's own reading, once a recognizer asked for it, so it is built once.
     private var anchorBlock: BlockContent??
@@ -170,6 +172,7 @@ public struct ParseContext {
         htmlNodes = nil
         htmlWrap = nil
         htmlSplit = nil
+        htmlOmit = nil
     }
 
     // MARK: Reading nodes
@@ -266,7 +269,7 @@ public struct ParseContext {
         onEnter: @autoclosure @escaping () -> String,
         onExit: @autoclosure @escaping () -> String
     ) -> Bool {
-        guard !isBlock, htmlWrap == nil else { return false }
+        guard !isBlock, htmlWrap == nil, htmlOmit == nil else { return false }
         if htmlSplit == nil {
             let nodes = [anchor.view] + claimed.map(\.view)
             guard let run = builder.literalTextRun(nodes), builder.canWrap(nodes[0], inBlock: false) else { return false }
@@ -288,10 +291,51 @@ public struct ParseContext {
         return true
     }
 
+    /// Leaves `syntax` — written in the siblings claimed, right after the anchor — out of
+    /// ``Markdown/renderHtml()``. The anchor renders as cmark renders it.
+    ///
+    /// For syntax written right after a node that belongs to it, such as an attribute block
+    /// after an image, `![Fox](fox.png){width=50%}`: claim the siblings that hold it, then ask
+    /// for this. `syntax` opens where the first sibling claimed does. The siblings it covers
+    /// whole don't render; a text sibling it ends inside renders only its text after it, as
+    /// cmark renders text. Whatever cmark read inside the syntax — emphasis, a link, an entity
+    /// or an escape — goes with it, and no custom node is made, so it works where none can go,
+    /// such as a GFM table cell. See <doc:HTMLOutput>.
+    ///
+    /// - Returns: `false`, and nothing is asked for, unless the anchor was met as phrasing
+    ///   content; siblings were claimed; `syntax` is not empty, opens where the first of them
+    ///   does, and ends inside the last, and every one between ends inside it or has no place
+    ///   (a soft line break); a last sibling that runs past it is text whose literal ends with
+    ///   the source after it; and no other HTML was asked for in this call.
+    @discardableResult
+    public mutating func omitHTML(_ syntax: Range<String.Index>) -> Bool {
+        let siblings = claimed.map(\.view)
+        guard
+            !isBlock, htmlNodes == nil, !syntax.isEmpty,
+            let first = siblings.first, let last = siblings.last,
+            builder.range(of: first)?.lowerBound == syntax.lowerBound,
+            let end = builder.range(of: last)?.upperBound, end >= syntax.upperBound,
+            // One cmark gave no place, such as a soft line break, lies between two that have one.
+            siblings.dropLast().allSatisfy({ builder.range(of: $0).map { $0.upperBound <= syntax.upperBound } ?? true })
+        else { return false }
+        var rest: String?
+        if end > syntax.upperBound {
+            let after = builder.text[syntax.upperBound..<end]
+            guard last.type == .text, let literal = last.literal, literal.hasSuffix(after) else { return false }
+            rest = String(after)
+        }
+        htmlNodes = [anchor.view] + siblings
+        htmlOmit = .some(rest)
+        return true
+    }
+
     /// The HTML asked for in this call, if any.
     var html: ExtensionHTML.Request? {
         guard let htmlNodes else { return nil }
         let nodes = htmlNodes.map(\.pointer)
+        if let htmlOmit {
+            return ExtensionHTML.Request(nodes: nodes, isBlock: false, kind: .omit(rest: htmlOmit))
+        }
         if let htmlWrap {
             return ExtensionHTML.Request(nodes: nodes, isBlock: isBlock, kind: .wrap(onEnter: htmlWrap.onEnter, onExit: htmlWrap.onExit))
         }

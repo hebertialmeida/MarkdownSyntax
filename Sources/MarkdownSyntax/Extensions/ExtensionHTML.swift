@@ -24,6 +24,9 @@ enum ExtensionHTML {
         case wrap(onEnter: () -> String, onExit: () -> String)
         /// Replaced by these pieces (text nodes only).
         case split([Piece])
+        /// The anchor as it is, the siblings after it left out, and `rest` — the text the last
+        /// of them keeps — in their place.
+        case omit(rest: String?)
     }
 
     /// One recognized anchor's HTML: its nodes are the anchor, then the siblings it claimed.
@@ -43,8 +46,10 @@ enum ExtensionHTML {
         let wrapper: UnsafeMutablePointer<cmark_node>?
         /// For a split, the new nodes in tree order.
         let created: [UnsafeMutablePointer<cmark_node>]
-        /// For a split, the original text nodes, out of the tree while it renders.
+        /// For a split or an omission, the original nodes, out of the tree while it renders.
         let originals: [UnsafeMutablePointer<cmark_node>]
+        /// For an omission, the anchor the originals follow.
+        var anchor: UnsafeMutablePointer<cmark_node>?
     }
 
     /// The requests applied to the tree, in order, to take out with ``revert()``.
@@ -65,6 +70,11 @@ enum ExtensionHTML {
                         cmark_node_insert_before(first, original)
                     }
                     step.created.forEach { cmark_node_free($0) }
+                } else if var previous = step.anchor {
+                    for original in step.originals {
+                        cmark_node_insert_after(previous, original)
+                        previous = original
+                    }
                 }
             }
         }
@@ -134,6 +144,19 @@ enum ExtensionHTML {
                 throw CMDocumentError.renderError
             }
             request.nodes.forEach { cmark_node_unlink($0) }
+            return step
+
+        case let .omit(rest):
+            // The anchor stays; the siblings after it go out, kept for the revert, and the text
+            // the last keeps takes their place.
+            let originals = Array(request.nodes.dropFirst())
+            let created = try rest.map { [try text($0, mem)] } ?? []
+            let step = Step(wrapper: nil, created: created, originals: originals, anchor: anchor)
+            for node in created where cmark_node_insert_after(anchor, node) != 1 {
+                created.forEach { cmark_node_free($0) }
+                throw CMDocumentError.renderError
+            }
+            originals.forEach { cmark_node_unlink($0) }
             return step
         }
     }

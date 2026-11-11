@@ -26,6 +26,13 @@ public extension CMNode {
 
     /// Renders the node as HTML without suspending.
     internal func renderHtmlNow(_ options: CMDocumentOption, extensions: CMExtensionOption) throws -> String {
+        try Self.renderHtmlNow(cmarkNode, options, extensions: extensions)
+    }
+
+    /// Renders a cmark node, and what it holds, as HTML without suspending.
+    internal static func renderHtmlNow(
+        _ cmarkNode: UnsafeMutablePointer<cmark_node>, _ options: CMDocumentOption, extensions: CMExtensionOption
+    ) throws -> String {
         var htmlExtensions: UnsafeMutablePointer<cmark_llist>?
 
         if extensions.contains(.tagfilters), let tagfilter = cmark_find_syntax_extension("tagfilter") {
