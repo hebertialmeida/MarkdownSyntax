@@ -201,6 +201,41 @@ final class AttachedSyntaxTests: XCTestCase {
         }
     }
 
+    func testRenderHtmlOfEachGroupIsItsRenderHtmlOf() async throws {
+        let source = "Before ![A *red* `fox` &amp; [more](m)](fox.png) after\n\n| a |\n|---|\n| ![**b**](b.png) |\n\n> ![c](c.png){width=50%} d\n\n![](e.png) ![e](e.png)\n"
+        for extensions: [MarkdownExtension] in [[], [AttributedImageExtension()]] {
+            let markdown = try await Markdown(text: source, syntaxExtensions: extensions)
+            let tree = await markdown.parse()
+            // With the extension, the quoted image is its node's, which `collect` doesn't open.
+            let images = collect(Image.self, in: tree)
+            XCTAssertEqual(images.count, extensions.isEmpty ? 5 : 4)
+            let paragraph = try XCTUnwrap(tree.children.first as? Paragraph)
+            let groups: [[Node]] = images.map(\.children) + [[], paragraph.children, images.map { $0 as Node }]
+            var each: [String] = []
+            for group in groups {
+                each.append(try await markdown.renderHtml(of: group))
+            }
+            let batch = try await markdown.renderHtml(ofEach: groups)
+            XCTAssertEqual(batch, each)
+            let labels = ["A <em>red</em> <code>fox</code> &amp; <a href=\"m\">more</a>", "<strong>b</strong>", "c", "", "e"]
+            XCTAssertEqual(Array(batch.prefix(images.count)), labels.filter { extensions.isEmpty || $0 != "c" })
+            let none = try await markdown.renderHtml(ofEach: [])
+            XCTAssertEqual(none, [])
+        }
+    }
+
+    func testRenderHtmlOfEachThrowsForANodeFromAnotherTree() async throws {
+        let other = try await Markdown(text: "elsewhere\n").parse()
+        let markdown = try await Markdown(text: "here\n")
+        let own = await markdown.parse()
+        do {
+            _ = try await markdown.renderHtml(ofEach: [own.children, other.children])
+            XCTFail("A node of another tree has no place in this one")
+        } catch {
+            XCTAssertEqual(error as? CMDocumentError, .renderError)
+        }
+    }
+
     func testRenderHtmlOfANodeFromAnotherTreeThrows() async throws {
         let other = try await Markdown(text: "elsewhere\n").parse()
         let markdown = try await Markdown(text: "here\n")

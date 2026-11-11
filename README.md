@@ -157,7 +157,8 @@ built exactly as before. The documentation catalog
 ([`MarkdownSyntax.docc`](Sources/MarkdownSyntax/MarkdownSyntax.docc)) has an article each on
 anchors and claiming siblings, ranges, the `plain` fallback and HTML output — including
 `omitHTML(_:)`, for syntax written right after a node such as `![Fox](fox.png){width=50%}`, and
-`renderHtml(of:)`, the HTML of part of the tree without parsing it again.
+`renderHtml(of:)` and `renderHtml(ofEach:)`, the HTML of parts of the tree without parsing it
+again.
 
 For more examples checkout the tests [MarkdownSyntaxTests](https://github.com/hebertialmeida/MarkdownSyntax/tree/master/Tests/MarkdownSyntaxTests).
 

@@ -71,3 +71,11 @@ nothing again.
 let html = try await markdown.renderHtml(of: image.children)
 // ![A *red* fox](fox.png)  →  A <em>red</em> fox
 ```
+
+Each call walks the document to find its nodes. For many parts of one document — every image's
+label — ``Markdown/renderHtml(ofEach:)`` renders each group as `renderHtml(of:)` would, with one
+walk for them all:
+
+```swift
+let captions = try await markdown.renderHtml(ofEach: images.map(\.children))
+```
