@@ -306,7 +306,8 @@ public struct ParseContext {
     ///   content; siblings were claimed; `syntax` is not empty, opens where the first of them
     ///   does, and ends inside the last, and every one between ends inside it or has no place
     ///   (a soft line break); a last sibling that runs past it is text whose literal ends with
-    ///   the source after it; and no other HTML was asked for in this call.
+    ///   the source after it — but for the spaces and tabs cmark drops right before a line end;
+    ///   and no other HTML was asked for in this call.
     @discardableResult
     public mutating func omitHTML(_ syntax: Range<String.Index>) -> Bool {
         let siblings = claimed.map(\.view)
@@ -320,9 +321,16 @@ public struct ParseContext {
         else { return false }
         var rest: String?
         if end > syntax.upperBound {
-            let after = builder.text[syntax.upperBound..<end]
-            guard last.type == .text, let literal = last.literal, literal.hasSuffix(after) else { return false }
-            rest = String(after)
+            let text = builder.text
+            var after = text[syntax.upperBound..<end]
+            guard last.type == .text, let literal = last.literal else { return false }
+            if !literal.hasSuffix(after), text.utf8[end...].first.map({ $0 == 0x0A || $0 == 0x0D }) == true {
+                // Right before a line end cmark drops the spaces and tabs from the text's literal,
+                // and keeps them in its place.
+                after = after.prefix(upTo: after.utf8.lastIndex { $0 != 0x20 && $0 != 0x09 }.map { after.utf8.index(after: $0) } ?? after.startIndex)
+            }
+            guard literal.hasSuffix(after) else { return false }
+            rest = after.isEmpty ? nil : String(after)
         }
         htmlNodes = [anchor.view] + siblings
         htmlOmit = .some(rest)

@@ -135,6 +135,32 @@ final class AttachedSyntaxTests: XCTestCase {
         }
     }
 
+    func testOmitTakesTheSpacesCmarkDropsBeforeALineEnd() async throws {
+        // cmark drops the spaces and tabs a text holds right before a line end from its literal,
+        // and keeps them in its place: the block is still left out, with what the text keeps.
+        let cases: [(name: String, source: String, without: String)] = [
+            ("hard break", "![Fox](fox.png){width=50%}  \nPhoto: Jane\n", "![Fox](fox.png)  \nPhoto: Jane\n"),
+            ("one space", "![Fox](fox.png){width=50%} \nPhoto: Jane\n", "![Fox](fox.png) \nPhoto: Jane\n"),
+            ("tab", "![Fox](fox.png){width=50%}\t\nPhoto: Jane\n", "![Fox](fox.png)\t\nPhoto: Jane\n"),
+            ("text, then a hard break", "![Fox](fox.png){width=50%} runs  \nPhoto: Jane\n", "![Fox](fox.png) runs  \nPhoto: Jane\n"),
+            ("CRLF", "![Fox](fox.png){width=50%}  \r\nPhoto: Jane\r\n", "![Fox](fox.png)  \r\nPhoto: Jane\r\n"),
+            ("quote", "> ![Fox](fox.png){width=50%} \t\n> Photo: Jane\n", "> ![Fox](fox.png) \t\n> Photo: Jane\n"),
+        ]
+        for item in cases {
+            let markdown = try await Markdown(text: item.source, options: Self.options, syntaxExtensions: [AttributedImageExtension()])
+            let tree = await markdown.parse()
+            let html = try await markdown.renderHtml()
+            let expected = try await Markdown(text: item.without, options: Self.options).renderHtml()
+            XCTAssertEqual(html, expected, item.name)
+            XCTAssertFalse(html.contains("{"), item.name)
+            XCTAssertEqual(collect(AttributedImage.self, in: tree).count, 1, item.name)
+            let (xml, plainXml) = (try await markdown.renderXml(), try await Markdown(text: item.source, options: Self.options).renderXml())
+            let again = try await markdown.renderHtml()
+            XCTAssertEqual(again, html, item.name)
+            XCTAssertEqual(xml, plainXml, item.name)
+        }
+    }
+
     func testTheNodeHoldsItsBlockAsWrittenAndThePlainReadingWhole() async throws {
         let source = "![Fox](fox.png){alt=\"*red* &amp;\"} runs\n"
         let tree = try await Markdown(text: source, syntaxExtensions: [AttributedImageExtension()]).parse()
