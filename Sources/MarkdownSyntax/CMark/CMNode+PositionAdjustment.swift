@@ -18,7 +18,7 @@
 //  syntax instead of comparing the label against the destination.
 //
 
-extension CMNode {
+extension CMNodeView {
 
     /// How a `.link` node was written in the source markdown.
     enum LinkSyntax {

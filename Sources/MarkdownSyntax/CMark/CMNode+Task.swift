@@ -12,10 +12,16 @@ import cmark_gfm_extensions
 /// Extension properties for tasklist items
 public extension CMNode {
     var taskCompleted: Bool? {
+        view.taskCompleted
+    }
+}
+
+extension CMNodeView {
+    var taskCompleted: Bool? {
         // Only tasklist items should have a taskCompleted value.
         guard humanReadableType == CMExtensionName.tasklist.rawValue else {
             return nil
         }
-        return cmark_gfm_extensions_get_tasklist_item_checked(cmarkNode)
+        return cmark_gfm_extensions_get_tasklist_item_checked(pointer)
     }
 }

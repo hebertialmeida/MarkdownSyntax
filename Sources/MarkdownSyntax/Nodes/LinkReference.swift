@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A link through a definition: `[label][id]`.
 public struct LinkReference: PhrasingContent, Parent, Reference {
     public let referenceType: ReferenceType
     public let children: [StaticPhrasingContent]

@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// One item of a list, which may be a task (`- [ ]`, `- [x]`).
 public struct ListItem: ListContent, Parent {
     public let checked: Bool?
     public let spread: Bool?

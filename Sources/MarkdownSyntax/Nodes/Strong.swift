@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// Strong emphasis: `**text**` or `__text__`.
 public struct Strong: StaticPhrasingContent, PhrasingContent, Parent {
     public let children: [PhrasingContent]
     public let position: Position

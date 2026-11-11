@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// One cell of a table row.
 public struct TableCell: RowContent, Parent {
     public let children: [PhrasingContent]
     public let position: Position

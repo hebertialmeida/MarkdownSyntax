@@ -12,6 +12,7 @@ import cmark_gfm_extensions
 
 /// Extension for manipulating ndoe values and the Abstract Syntax Tree
 public extension CMNode {
+    /// Why a change to the cmark tree was refused.
     enum ASTError: Error {
         case canNotSetValue
         case canNotInsert

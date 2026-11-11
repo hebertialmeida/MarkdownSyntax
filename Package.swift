@@ -19,6 +19,13 @@ let package = Package(
                 .product(name: "cmark-gfm-extensions", package: "swift-cmark"),
             ]
         ),
-        .testTarget(name: "MarkdownSyntaxTests", dependencies: ["MarkdownSyntax"]),
+        // `swift run -c release Benchmarks` times the parser over generated fixtures.
+        // Not a product, so packages that depend on MarkdownSyntax never build it.
+        .executableTarget(name: "Benchmarks", dependencies: ["MarkdownSyntax"]),
+        .testTarget(
+            name: "MarkdownSyntaxTests",
+            dependencies: ["MarkdownSyntax"],
+            resources: [.copy("Fixtures")]
+        ),
     ]
 )

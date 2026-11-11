@@ -137,4 +137,72 @@ final class ConcurrencyTests: XCTestCase {
             }
         }
     }
+
+    // MARK: - Every renderer on one parser with syntax extensions
+
+    /// With syntax extensions, ``Markdown/renderHtml()`` puts custom nodes in a cmark tree of its
+    /// render's own. Every other renderer of the same parser runs concurrently with it: each
+    /// output is the one a render on its own gives, and Thread Sanitizer sees no race.
+    func testEveryRendererOfOneParserRunsWhileRenderHtmlChangesTheTree() async throws {
+        let source = String(repeating: "Some ==marked== text.\n\nListing: Title\n\n    let x = 1\n\n> ==quoted==\n\n", count: 40)
+        let markdown = try await Markdown(text: source, syntaxExtensions: [HighlightExtension(), ListingExtension()])
+        let reference = try await Markdown(text: source)
+        let html = try await markdown.renderHtml()
+        let xml = try await reference.renderXml()
+        let commonMark = try await reference.renderCommonMark(width: 0)
+        let man = try await reference.renderMan(width: 0)
+        let latex = try await reference.renderLatex(width: 0)
+        let plain = try await reference.renderPlainText(width: 0)
+        XCTAssertTrue(html.contains("<mark>marked</mark>"))
+        XCTAssertTrue(html.contains("<figure class=\"listing\">"))
+        XCTAssertFalse(xml.contains("custom_"))
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for i in 0..<200 {
+                group.addTask {
+                    let (output, expected): (String, String)
+                    switch i % 6 {
+                    case 0: (output, expected) = (try await markdown.renderHtml(), html)
+                    case 1: (output, expected) = (try await markdown.renderXml(), xml)
+                    case 2: (output, expected) = (try await markdown.renderCommonMark(width: 0), commonMark)
+                    case 3: (output, expected) = (try await markdown.renderMan(width: 0), man)
+                    case 4: (output, expected) = (try await markdown.renderLatex(width: 0), latex)
+                    default: (output, expected) = (try await markdown.renderPlainText(width: 0), plain)
+                    }
+                    XCTAssertEqual(output, expected, "renderer \(i % 6)")
+                }
+            }
+            try await group.waitForAll()
+        }
+    }
+
+    /// `renderHtml()` never changes ``Markdown/document``: whoever holds it renders and walks it
+    /// while the parser renders its extensions' HTML, and reads cmark's own tree (D-15, N4).
+    func testTheDocumentIsNeverChangedWhileTheParserRendersItsHTML() async throws {
+        let source = (0..<40).map { "Some ==marked== text \($0).\n\nListing: \($0)\n\n```\ncode\n```\n" }.joined(separator: "\n")
+        let markdown = try await Markdown(text: source, syntaxExtensions: [HighlightExtension(), ListingExtension()])
+        let document = await markdown.document
+        let plain = try await Markdown(text: source).renderHtml()
+        let html = try await markdown.renderHtml()
+        XCTAssertTrue(html.contains("<mark>marked</mark>"))
+
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for i in 0..<100 {
+                group.addTask {
+                    if i.isMultiple(of: 2) {
+                        let output = try await markdown.renderHtml()
+                        XCTAssertEqual(output, html)
+                    } else {
+                        let output = try await document.renderHtml()
+                        XCTAssertEqual(output, plain, "the document as cmark made it")
+                        func custom(in node: CMNodeView) -> Int {
+                            node.children.reduce(node.type == .customBlock || node.type == .customInline ? 1 : 0) { $0 + custom(in: $1) }
+                        }
+                        XCTAssertEqual(custom(in: document.node.view), 0, "no custom node in the document")
+                    }
+                }
+            }
+            try await group.waitForAll()
+        }
+    }
 }

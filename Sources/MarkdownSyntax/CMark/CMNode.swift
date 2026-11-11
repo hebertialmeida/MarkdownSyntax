@@ -28,7 +28,7 @@ public final class CMNode: @unchecked Sendable {
     ///
     /// - Parameters:
     ///     - cmarkNode: The underlying cmark node pointer.
-    ///     - memoryOwner: indicates who really owns thememory.
+    ///     - potentialMemoryOwner: indicates who really owns thememory.
     ///          if this is nil, then this node really owns the memory,
     ///          and it should be freed when this node goes away.
     /// - Returns:
@@ -67,6 +67,11 @@ public final class CMNode: @unchecked Sendable {
 
 /// Node extension properties.
 public extension CMNode {
+
+    /// A non-owning view of the same node, which every read below goes through.
+    internal var view: CMNodeView {
+        CMNodeView(pointer: cmarkNode)
+    }
 
     /// Wraps the cmark node pointer in a CMNode.
     ///
@@ -120,144 +125,107 @@ public extension CMNode {
 
     /// The node type.
     var type: CMNodeType {
-        let cmarkNodeType = cmark_node_get_type(cmarkNode)
-        return CMNodeType(rawValue: cmarkNodeType.rawValue)
+        view.type
     }
 
     /// The human readable type.
     var humanReadableType: String? {
-        guard let buffer = cmark_node_get_type_string(cmarkNode) else {
-            return nil
-        }
-
-        return String(cString: buffer)
+        view.humanReadableType
     }
 
     /// The string value (literal).
     var stringValue: String? {
-        return literal
+        view.stringValue
     }
 
     /// The string content value.
     var stringContent: String? {
-        guard let buffer = cmark_node_get_string_content(cmarkNode) else {
-            return nil
-        }
-
-        return String(cString: buffer)
+        view.stringContent
     }
 
     /// The heading level.
     var headingLevel: Int {
-        Int(cmark_node_get_heading_level(cmarkNode))
+        view.headingLevel
     }
 
     /// The fenced code info.
     var fencedCodeInfo: String? {
-        guard let buffer = cmark_node_get_fence_info(cmarkNode) else {
-            return nil
-        }
-
-        return String(cString: buffer)
+        view.fencedCodeInfo
     }
 
     /// The custom on enter value.
     var customOnEnter: String? {
-        guard let buffer = cmark_node_get_on_enter(cmarkNode) else {
-            return nil
-        }
-
-        return String(cString: buffer)
+        view.customOnEnter
     }
 
     /// The custom on exit value.
     var customOnExit: String? {
-        guard let buffer = cmark_node_get_on_exit(cmarkNode) else {
-            return nil
-        }
-
-        return String(cString: buffer)
+        view.customOnExit
     }
 
     /// The list type.
     var listType: CMListType {
-        return CMListType(rawValue: cmark_node_get_list_type(cmarkNode).rawValue) ?? .none
+        view.listType
     }
 
     /// The list delimiter type.
     var listDelimiterType: CMDelimiterType {
-        return CMDelimiterType(rawValue: cmark_node_get_list_delim(cmarkNode).rawValue) ?? .none
+        view.listDelimiterType
     }
 
     /// The list starting number.
     var listStartingNumber: Int {
-        Int(cmark_node_get_list_start(cmarkNode))
+        view.listStartingNumber
     }
 
     /// The list tight.
     var listTight: Bool {
-        return cmark_node_get_list_tight(cmarkNode) != 0
+        view.listTight
     }
 
     /// The link URL as a string.
     var linkDestination: String? {
-        guard let buffer = cmark_node_get_url(cmarkNode) else {
-            return nil
-        }
-
-        return String(cString: buffer)
+        view.linkDestination
     }
 
     /// The link URL.
     var linkUrl: URL? {
-        guard let destination = linkDestination else {
-            return nil
-        }
-
-        return URL(string: destination)
+        view.linkUrl
     }
 
     /// The link title.
     var linkTitle: String? {
-        guard let buffer = cmark_node_get_title(cmarkNode) else {
-            return nil
-        }
-
-        return String(cString: buffer)
+        view.linkTitle
     }
 
     /// The literal.
     var literal: String? {
-        guard let buffer = cmark_node_get_literal(cmarkNode) else {
-            return nil
-        }
-
-        return String(cString: buffer)
+        view.literal
     }
 
     /// The start line.
     var startLine: Int {
-        Int(cmark_node_get_start_line(cmarkNode))
+        view.startLine
     }
 
     /// The start column.
     var startColumn: Int {
-        Int(cmark_node_get_start_column(cmarkNode))
+        view.startColumn
     }
 
     /// The end line.
     var endLine: Int {
-        Int(cmark_node_get_end_line(cmarkNode))
+        view.endLine
     }
 
     /// The end column.
     var endColumn: Int {
-        Int(cmark_node_get_end_column(cmarkNode))
+        view.endColumn
     }
 
     /// Backtick count for code.
     var backtickCount: Int {
-        Int(cmark_node_get_backtick_count(cmarkNode))
+        view.backtickCount
     }
 
     /// Returns an iterator for the node.
@@ -269,15 +237,6 @@ public extension CMNode {
     /// if no extension. Should only ever return a single extension option value,
     /// as a node can never be associated with multiple extensions
     var `extension`: CMExtensionOption? {
-        guard let ext = cmark_node_get_syntax_extension(cmarkNode) else {
-            return nil
-        }
-        let extName = String(cString: ext.pointee.name)
-        let result = CMExtensionOption.option(forExtensionName: extName)
-        if result == CMExtensionOption.none {
-            return nil
-        } else {
-            return result
-        }
+        view.`extension`
     }
 }

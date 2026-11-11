@@ -12,6 +12,12 @@ jobs:
           xcode-version: '16.4.0'
       - name: Run tests
         run: swift test --enable-code-coverage
+      # The documentation catalog, articles and symbol docs, with any DocC warning an error.
+      - name: Build documentation
+        run: >
+          xcodebuild docbuild -workspace .swiftpm/xcode/package.xcworkspace -scheme MarkdownSyntax
+          -destination 'platform=macOS' -derivedDataPath .build/docbuild
+          OTHER_DOCC_FLAGS="--warnings-as-errors"
       - name: Generate coverage report
         run: |
           CODECOV_DIR=$(find .build -name 'codecov' -type d | head -1)

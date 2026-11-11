@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// An ordered or bulleted list.
 public struct List: BlockContent, Parent {
     public let ordered: Bool
     public let start: Int?

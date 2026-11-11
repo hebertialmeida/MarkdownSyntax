@@ -109,6 +109,15 @@ public class CMDocument: @unchecked Sendable {
 
 }
 
+extension CMDocument {
+
+    /// `text` parsed as this document was, with its options and extensions: the same text gives
+    /// the same tree, node for node.
+    func parsedAgain(_ text: String) throws -> CMDocument {
+        try CMDocument(text: text, options: options, extensions: extensions)
+    }
+}
+
 /// Document rendering methods.
 public extension CMDocument {
 
@@ -122,6 +131,11 @@ public extension CMDocument {
         try await node.renderHtml(options, extensions: extensions)
     }
 
+    /// Renders the document as HTML without suspending.
+    internal func renderHtmlNow() throws -> String {
+        try node.renderHtmlNow(options, extensions: extensions)
+    }
+
     /// Renders the document as XML.
     ///
     /// - Throws:
@@ -130,6 +144,11 @@ public extension CMDocument {
     ///     The XML as a string.
     func renderXml() async throws -> String {
         try await node.renderXml(options)
+    }
+
+    /// Renders the document as XML without suspending.
+    internal func renderXmlNow() throws -> String {
+        try node.renderXmlNow(options)
     }
 
     /// Renders the document as groff man page.
@@ -144,6 +163,11 @@ public extension CMDocument {
         try await node.renderMan(options, width: width)
     }
 
+    /// Renders the document as groff man page without suspending.
+    internal func renderManNow(width: Int32) throws -> String {
+        try node.renderManNow(options, width: width)
+    }
+
     /// Renders the document as common mark.
     ///
     /// - Parameters:
@@ -154,6 +178,11 @@ public extension CMDocument {
     ///     The common mark as a string.
     func renderCommonMark(width: Int32) async throws -> String {
         try await node.renderCommonMark(options, width: width)
+    }
+
+    /// Renders the document as common mark without suspending.
+    internal func renderCommonMarkNow(width: Int32) throws -> String {
+        try node.renderCommonMarkNow(options, width: width)
     }
 
     /// Renders the document as Latex.
@@ -168,6 +197,11 @@ public extension CMDocument {
         try await node.renderLatex(options, width: width)
     }
 
+    /// Renders the document as Latex without suspending.
+    internal func renderLatexNow(width: Int32) throws -> String {
+        try node.renderLatexNow(options, width: width)
+    }
+
     /// Renders the document as plain text.
     ///
     /// - Parameters:
@@ -178,6 +212,11 @@ public extension CMDocument {
     ///     The plain text as a string.
     func renderPlainText(width: Int32) async throws -> String {
         try await node.renderPlainText(options, width: width)
+    }
+
+    /// Renders the document as plain text without suspending.
+    internal func renderPlainTextNow(width: Int32) throws -> String {
+        try node.renderPlainTextNow(options, width: width)
     }
 
 }

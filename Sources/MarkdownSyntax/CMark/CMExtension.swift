@@ -90,7 +90,7 @@ public struct CMExtensionOption: OptionSet, Sendable {
     /// Get an option that corresponds to the given extension name
     ///
     /// - Parameters:
-    ///    - forExtensionName: the extension name for which we want to find the associated option
+    ///    - name: the extension name for which we want to find the associated option
     ///
     /// - Returns:
     ///    The option associated with the extension name if any, or nil if the extension isn't supported.

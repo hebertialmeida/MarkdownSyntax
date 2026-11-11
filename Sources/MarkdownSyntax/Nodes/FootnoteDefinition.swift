@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A footnote's text: `[^label]: text`.
 public struct FootnoteDefinition: DefinitionContent, Parent, Association {
     public let identifier: String
     public let label: String?

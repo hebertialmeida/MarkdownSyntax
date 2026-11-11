@@ -9,12 +9,12 @@
 import cmark_gfm
 import cmark_gfm_extensions
 
-extension CMNode {
+extension CMNodeView {
     func getTableAlignments() -> [AlignType] {
         guard type == .extension(.table) else { return [] }
 
-        let columns = cmark_gfm_extensions_get_table_columns(cmarkNode)
-        var alignments = cmark_gfm_extensions_get_table_alignments(cmarkNode)
+        let columns = cmark_gfm_extensions_get_table_columns(pointer)
+        var alignments = cmark_gfm_extensions_get_table_alignments(pointer)
 
         var align: [String] = []
 

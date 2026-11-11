@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A GFM table, with each column's alignment.
 public struct Table: BlockContent, Parent {
     public let align: [AlignType]?
     public let children: [TableContent]

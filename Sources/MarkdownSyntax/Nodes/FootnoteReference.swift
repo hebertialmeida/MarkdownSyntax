@@ -6,6 +6,7 @@
 //  Copyright © 2019 Heberti Almeida. All rights reserved.
 //
 
+/// A footnote reference: `[^label]`.
 public struct FootnoteReference: StaticPhrasingContent, PhrasingContent, Association {
     public let identifier: String
     public let label: String?
