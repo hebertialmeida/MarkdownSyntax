@@ -161,6 +161,31 @@ final class AttachedSyntaxTests: XCTestCase {
         }
     }
 
+    func testARenderPutsBackSeveralOmittedSiblingsInOrderWithNothingAfterTheBlock() async throws {
+        // The block ends where its last sibling does, so no text takes their place: the render
+        // puts each back after the one before it, and the tree reads as cmark's again.
+        let cases: [(name: String, source: String, without: String)] = [
+            ("emphasis", "![Fox](fox.png){alt=\"*red* fox\"}\n", "![Fox](fox.png)\n"),
+            ("link", "![Fox](fox.png){alt=\"[a](b)\"}\n", "![Fox](fox.png)\n"),
+            ("line break", "![Fox](fox.png){alt=\"a\nb\"}\n", "![Fox](fox.png)\n"),
+        ]
+        for item in cases {
+            let markdown = try await Markdown(text: item.source, options: Self.options, syntaxExtensions: [AttributedImageExtension()])
+            let tree = await markdown.parse()
+            let node = try XCTUnwrap(collect(AttributedImage.self, in: tree).first, item.name)
+            XCTAssertNil(node.rest, item.name)
+            XCTAssertGreaterThanOrEqual(node.plain.count - 1, 2, item.name)
+            let html = try await markdown.renderHtml()
+            let expected = try await Markdown(text: item.without, options: Self.options).renderHtml()
+            XCTAssertEqual(html, expected, item.name)
+            let plainXml = try await Markdown(text: item.source, options: Self.options).renderXml()
+            let xml = try await markdown.renderXml()
+            XCTAssertEqual(xml, plainXml, item.name)
+            let again = try await markdown.renderHtml()
+            XCTAssertEqual(again, html, item.name)
+        }
+    }
+
     func testTheNodeHoldsItsBlockAsWrittenAndThePlainReadingWhole() async throws {
         let source = "![Fox](fox.png){alt=\"*red* &amp;\"} runs\n"
         let tree = try await Markdown(text: source, syntaxExtensions: [AttributedImageExtension()]).parse()
