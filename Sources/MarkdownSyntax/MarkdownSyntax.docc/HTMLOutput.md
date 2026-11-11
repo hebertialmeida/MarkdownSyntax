@@ -19,9 +19,21 @@ context.wrapHTML(content, in: syntax, onEnter: "<mark>", onExit: "</mark>")
 // Some ==marked== text  →  <p>Some <mark>marked</mark> text</p>
 ```
 
-Both are kept only if the recognizer returns nodes, and ``Markdown/renderHtml()`` includes them
-whether or not ``Markdown/parse()`` ran first: with extensions, the tree is built once and both
-use it. `onEnter` and `onExit` are evaluated only when the document renders HTML, so a parse
+- ``ParseContext/omitHTML(_:)`` is for syntax written right after a node and belonging to it,
+  such as an attribute block after an image: claim the siblings cmark read it into, then leave
+  it out. The anchor renders as cmark renders it; the siblings the syntax covers don't render,
+  and the text the last of them holds after it renders as text. It makes no custom node, so it
+  works in a table cell too.
+
+```swift
+context.claim(through: lastSiblingOfTheBlock)
+context.omitHTML(block)
+// ![Fox](fox.png){alt="*red* fox"} runs  →  <p><img src="fox.png" alt="Fox" /> runs</p>
+```
+
+Each is kept only if the recognizer returns nodes, and one call asks for one of them, and ``Markdown/renderHtml()`` includes them
+whether or not ``Markdown/parse()`` ran first: with extensions, the tree is built once and the
+render uses it. `onEnter` and `onExit` are evaluated only when the document renders HTML, so a parse
 that never renders, such as an editor's, never builds them.
 
 ## How it renders
@@ -41,9 +53,29 @@ runs.
 ## Where a custom node can't go
 
 A custom node goes where its parent can contain one. A GFM table cell can't: there, both
-`wrapHTML` calls return `false`, nothing is asked for, and the cell renders as cmark renders it.
+`wrapHTML` calls return `false` (``ParseContext/omitHTML(_:)`` makes none, and still works), nothing is asked for, and the cell renders as cmark renders it.
 The tree still has your nodes.
 
 cmark renders a wrapped node as though the custom node were its parent. A paragraph in a tight
 list renders without `<p>` because its grandparent is the list; wrapped, its grandparent is the
 item, and it renders with `<p>`.
+
+## HTML of part of the tree
+
+``Markdown/renderHtml(of:)`` renders nodes of the tree, one after another, as cmark renders them
+in the document, with no extension's HTML in it: an image's label set as a caption, say, with
+its emphasis, where its `alt` has only the words. It reads cmark's tree in place, so it parses
+nothing again.
+
+```swift
+let html = try await markdown.renderHtml(of: image.children)
+// ![A *red* fox](fox.png)  →  A <em>red</em> fox
+```
+
+Each call walks the document to find its nodes. For many parts of one document — every image's
+label — ``Markdown/renderHtml(ofEach:)`` renders each group as `renderHtml(of:)` would, with one
+walk for them all:
+
+```swift
+let captions = try await markdown.renderHtml(ofEach: images.map(\.children))
+```

@@ -119,6 +119,149 @@ public final actor Markdown {
     }
 }
 
+public extension Markdown {
+
+    /// Renders nodes of the tree as HTML, each as cmark renders it in the document, one after
+    /// another.
+    ///
+    /// For HTML of part of the document without parsing it again, such as an image's label set
+    /// as a caption: `renderHtml(of: image.children)` is `A <em>red</em> fox` where the
+    /// image's `alt` is `A red fox`. The nodes are found in cmark's tree by their kind and
+    /// position, and rendered as cmark renders them with no syntax extension: what an extension
+    /// asked of ``renderHtml()`` is not in it. An extension's node renders as its
+    /// ``ExtensionContent/plain`` nodes.
+    ///
+    /// - Parameter nodes: Nodes of this parser's tree.
+    /// - Throws:
+    ///     `CMDocumentError.renderError` if a node isn't in this parser's tree, or there is an
+    ///     error rendering the HTML.
+    /// - Returns:
+    ///     The HTML as a string.
+    func renderHtml(of nodes: [Node]) async throws -> String {
+        try await renderHtml(ofEach: [nodes])[0]
+    }
+
+    /// Renders each group of nodes of the tree as HTML, as ``renderHtml(of:)`` renders it, with
+    /// one walk of cmark's tree for them all.
+    ///
+    /// ``renderHtml(of:)`` walks the document to find its nodes. To render many parts of one
+    /// document — every image's label set as a caption, say — ask for them together, so the
+    /// document is walked once rather than once per part:
+    ///
+    /// ```swift
+    /// let captions = try await markdown.renderHtml(ofEach: images.map(\.children))
+    /// ```
+    ///
+    /// - Parameter groups: Groups of nodes of this parser's tree.
+    /// - Throws:
+    ///     `CMDocumentError.renderError` if a node isn't in this parser's tree, or there is an
+    ///     error rendering the HTML.
+    /// - Returns:
+    ///     The HTML of each group, in order: an empty group's is empty.
+    func renderHtml(ofEach groups: [[Node]]) async throws -> [String] {
+        let targets = groups.map { $0.flatMap(Self.plainNodes) }
+        let found = try cmarkNodes(for: targets)
+        var html = [String]()
+        html.reserveCapacity(targets.count)
+        var next = found.makeIterator()
+        for group in targets {
+            var part = ""
+            for _ in group {
+                guard let pointer = next.next() else { throw CMDocumentError.renderError }
+                part += try cmark.renderHtmlNow(CMNodeView(pointer: pointer))
+            }
+            html.append(part)
+        }
+        return html
+    }
+
+    /// Where a node sits, for finding it by its place: the line and column it opens and ends at.
+    private struct Place: Hashable {
+        let start: (line: Int, column: Int)
+        let end: (line: Int, column: Int)
+
+        init(_ position: Position) {
+            start = (position.start.line, position.start.column)
+            end = (position.end.line, position.end.column)
+        }
+
+        static func == (lhs: Place, rhs: Place) -> Bool {
+            lhs.start == rhs.start && lhs.end == rhs.end
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(start.line)
+            hasher.combine(start.column)
+            hasher.combine(end.line)
+            hasher.combine(end.column)
+        }
+    }
+
+    /// Each group's nodes in cmark's tree, in order, found by their kind and position in one walk
+    /// of it, from the document: in its group, a node takes the first of its kind at its position
+    /// that no node before it took.
+    private func cmarkNodes(for groups: [[Node]]) throws -> [UnsafeMutablePointer<cmark_node>] {
+        let count = groups.reduce(0) { $0 + $1.count }
+        guard count > 0 else { return [] }
+        let builder = TreeBuilder(text: text, lineOffsets: lineOffsets, footnoteIndex: 0, syntax: SyntaxRegistry([]))
+        // The nodes not found yet, by place, in order.
+        var wanted = [Place: [(index: Int, group: Int, kinds: [NodeKind], position: Position)]]()
+        var kinds = Set<NodeKind>()
+        var index = 0
+        for (group, nodes) in groups.enumerated() {
+            for node in nodes {
+                let nodeKinds = NodeKind.kinds(of: node)
+                guard !nodeKinds.isEmpty else { throw CMDocumentError.renderError }
+                kinds.formUnion(nodeKinds)
+                wanted[Place(node.position), default: []].append((index, group, nodeKinds, node.position))
+                index += 1
+            }
+        }
+        var found = [UnsafeMutablePointer<cmark_node>?](repeating: nil, count: count)
+        var remaining = count
+
+        var cursor: CMNodeView? = cmark.node.view
+        while let node = cursor, remaining > 0 {
+            if let kind = NodeKind(node.type), kinds.contains(kind) {
+                let position = builder.position(for: node)
+                let place = Place(position)
+                if var here = wanted[place] {
+                    // One node per group: groups are rendered apart, and may hold the same node.
+                    var taken: [Int] = []
+                    here.removeAll { target in
+                        guard target.kinds.contains(kind), target.position == position, !taken.contains(target.group) else { return false }
+                        taken.append(target.group)
+                        found[target.index] = node.pointer
+                        remaining -= 1
+                        return true
+                    }
+                    wanted[place] = here.isEmpty ? nil : here
+                }
+            }
+            if let child = node.firstChild {
+                cursor = child
+            } else {
+                var up: CMNodeView? = node
+                cursor = nil
+                while let current = up {
+                    if let next = current.next { cursor = next; break }
+                    up = current.parent
+                }
+            }
+        }
+        return try found.map { pointer in
+            guard let pointer else { throw CMDocumentError.renderError }
+            return pointer
+        }
+    }
+
+    /// A node as cmark made it: an extension's node is its plain nodes.
+    private static func plainNodes(_ node: Node) -> [Node] {
+        if let node = node as? ExtensionContent { return node.plain.flatMap(plainNodes) }
+        return [node]
+    }
+}
+
 /// Builds the Swift tree from cmark's, in one walk, offering each anchor to its extensions.
 ///
 /// One builder serves one build, inside the parser's isolation.
