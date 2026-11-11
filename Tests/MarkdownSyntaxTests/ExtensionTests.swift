@@ -37,9 +37,28 @@ final class ExtensionTests: XCTestCase {
     }
 
     func testAnExtensionIsOfferedOnlyItsAnchorTypes() async throws {
-        let recorder = AnchorRecorder(anchors: [.blockQuote, .code])
+        let recorder = AnchorRecorder(anchors: [.blockquote, .inlineCode])
         _ = try await Markdown(text: "Text `code`\n\n> quote `more`\n\n```\nblock\n```\n", syntaxExtensions: [recorder]).parse()
-        XCTAssertEqual(recorder.offered, ["code", "blockQuote", "code"])
+        XCTAssertEqual(recorder.offered, ["inlineCode", "blockquote", "inlineCode"])
+    }
+
+    func testFrameKindsAreNeverOfferedAndAnAnchorReadsItsParentsKind() async throws {
+        let frames = AnchorRecorder(anchors: [.root, .listItem, .tableRow, .tableCell, .footnoteDefinition])
+        let source = "- item\n\n| a |\n|---|\n| b |\n\nNote[^1]\n\n[^1]: The note.\n"
+        _ = try await Markdown(text: source, syntaxExtensions: [frames]).parse()
+        XCTAssertEqual(frames.offered, [])
+
+        let paragraphs = ParentRecorder(anchors: [.paragraph])
+        _ = try await Markdown(text: "Top\n\n- item\n\n> quoted\n", syntaxExtensions: [paragraphs]).parse()
+        XCTAssertEqual(paragraphs.parents, [.root, .listItem, .blockquote])
+    }
+
+    func testEveryKindReadsBackFromItsCmarkType() {
+        for kind in NodeKind.allCases {
+            XCTAssertEqual(NodeKind(kind.cmarkType), kind, "\(kind)")
+        }
+        XCTAssertNil(NodeKind(.customBlock))
+        XCTAssertNil(NodeKind(.customInline))
     }
 
     func testExtensionsSharingAnAnchorAreTriedInOrderAndTheFirstMatchWins() async throws {
@@ -309,16 +328,12 @@ enum UnknownExtensionReader {
     }
 }
 
-/// Offered every anchor type; reads each anchor, and with `claimAndWrap` claims the next sibling
+/// Offered every anchor kind; reads each anchor, and with `claimAndWrap` claims the next sibling
 /// and asks for HTML, then returns nil.
 private struct RejectingExtension: MarkdownExtension {
     var claimAndWrap = false
 
-    let anchors: [CMNodeType] = [
-        .blockQuote, .list, .codeBlock, .htmlBlock, .paragraph, .heading, .thematicBreak,
-        .text, .softBreak, .lineBreak, .code, .htmlInline, .emphasis, .strong, .link, .image,
-        .footnoteReference, .extension(.table), .extension(.strikethrough),
-    ]
+    let anchors = NodeKind.allCases
 
     func recognizeBlock(in context: inout ParseContext) -> [BlockContent]? {
         _ = context.plainBlock(context.anchor)
@@ -339,22 +354,37 @@ private struct RejectingExtension: MarkdownExtension {
     }
 }
 
-/// Records the type of every anchor it is offered.
+/// Records the kind of every anchor it is offered.
 private final class AnchorRecorder: MarkdownExtension, @unchecked Sendable {
-    let anchors: [CMNodeType]
+    let anchors: [NodeKind]
     private(set) var offered: [String] = []
 
-    init(anchors: [CMNodeType]) {
+    init(anchors: [NodeKind]) {
         self.anchors = anchors
     }
 
     func recognizeBlock(in context: inout ParseContext) -> [BlockContent]? {
-        offered.append("\(context.anchor.type)")
+        offered.append(context.anchor.kind.map { "\($0)" } ?? "nil")
         return nil
     }
 
     func recognizePhrasing(in context: inout ParseContext) -> [PhrasingContent]? {
-        offered.append("\(context.anchor.type)")
+        offered.append(context.anchor.kind.map { "\($0)" } ?? "nil")
+        return nil
+    }
+}
+
+/// Records the kind of each anchor's parent.
+private final class ParentRecorder: MarkdownExtension, @unchecked Sendable {
+    let anchors: [NodeKind]
+    private(set) var parents: [NodeKind?] = []
+
+    init(anchors: [NodeKind]) {
+        self.anchors = anchors
+    }
+
+    func recognizeBlock(in context: inout ParseContext) -> [BlockContent]? {
+        parents.append(context.anchor.parent?.kind)
         return nil
     }
 }
@@ -366,7 +396,7 @@ private struct Shout: PhrasingContent, ExtensionContent {
 }
 
 private struct ShoutExtension: MarkdownExtension {
-    let anchors: [CMNodeType] = [.text]
+    let anchors: [NodeKind] = [.text]
 
     func recognizePhrasing(in context: inout ParseContext) -> [PhrasingContent]? {
         guard
@@ -395,7 +425,7 @@ private final class HTMLCounter: @unchecked Sendable {
 /// markup as it is built.
 private struct CountingExtension: MarkdownExtension {
     let built: HTMLCounter
-    var anchors: [CMNodeType] { [.paragraph, .text] }
+    var anchors: [NodeKind] { [.paragraph, .text] }
 
     func recognizeBlock(in context: inout ParseContext) -> [BlockContent]? {
         guard let paragraph = context.plainBlock(context.anchor) else { return nil }
@@ -419,7 +449,7 @@ private struct CountingExtension: MarkdownExtension {
 
 /// Renders every paragraph inside a `<div>`, and keeps it as it is in the tree.
 private struct DivExtension: MarkdownExtension {
-    let anchors: [CMNodeType] = [.paragraph]
+    let anchors: [NodeKind] = [.paragraph]
 
     func recognizeBlock(in context: inout ParseContext) -> [BlockContent]? {
         guard let paragraph = context.plainBlock(context.anchor) else { return nil }

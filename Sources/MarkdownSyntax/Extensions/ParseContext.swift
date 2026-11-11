@@ -13,9 +13,9 @@ public struct SourceNode: Equatable {
 
     let view: CMNodeView
 
-    /// The cmark node type.
-    public var type: CMNodeType {
-        view.type
+    /// The kind of node the tree reads this as, or `nil` for a cmark node it has no node for.
+    public var kind: NodeKind? {
+        NodeKind(view.type)
     }
 
     /// The literal cmark keeps for text, code, code blocks and HTML, after it resolved entities
@@ -73,7 +73,7 @@ public struct ParseContext {
     /// Whether the anchor was met as block content, rather than phrasing content.
     let isBlock: Bool
 
-    /// The node this extension is offered: its type is one of the extension's anchors.
+    /// The node this extension is offered: its kind is one of the extension's anchors.
     public let anchor: SourceNode
 
     /// The last sibling claimed, if any.

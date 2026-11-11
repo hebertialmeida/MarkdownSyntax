@@ -1,11 +1,12 @@
 # Anchors
 
-Name the cmark node your syntax starts in, and read from there.
+Name the kind of node your syntax starts in, and read from there.
 
 ## Overview
 
-An extension's ``MarkdownExtension/anchors`` are the cmark node types it is offered. The tree
-build walks cmark's tree once; at each node it looks the node's type up, and if extensions are
+An extension's ``MarkdownExtension/anchors`` are the ``NodeKind``s it is offered, named after the
+tree's node types. The tree build walks cmark's tree once; at each node it looks the node's kind
+up, and if extensions are
 anchored on it, offers the node to each in turn, in the order they were registered. The first
 that returns nodes wins. If none does, the node reads as cmark's.
 
@@ -13,12 +14,15 @@ Pick the anchor by where cmark puts your syntax:
 
 | Syntax written… | Anchor | Recognizer |
 |---|---|---|
-| on the first line of a quote, `> [!kind]` | `.blockQuote` | ``MarkdownExtension/recognizeBlock(in:)`` |
+| on the first line of a quote, `> [!kind]` | `.blockquote` | ``MarkdownExtension/recognizeBlock(in:)`` |
 | as a paragraph of its own, `{{name}}` | `.paragraph` | ``MarkdownExtension/recognizeBlock(in:)`` |
-| in a fence's info string | `.codeBlock` | ``MarkdownExtension/recognizeBlock(in:)`` |
+| in a fence's info string | `.code` | ``MarkdownExtension/recognizeBlock(in:)`` |
 | after a heading's text, `{#id}` | `.heading` | ``MarkdownExtension/recognizeBlock(in:)`` |
 | in running text, `==mark==` | `.text` | ``MarkdownExtension/recognizePhrasing(in:)`` |
 | right after an image, `{width=50%}` | `.image` | ``MarkdownExtension/recognizePhrasing(in:)`` |
+
+The document, list items, table rows and cells, and footnote definitions are never offered: name
+the paragraph, quote or text inside them instead. They are kinds an anchor's parent can have.
 
 A block anchor is offered through ``MarkdownExtension/recognizeBlock(in:)`` and a phrasing anchor
 through ``MarkdownExtension/recognizePhrasing(in:)``. Nodes inside a list item or a quote are
@@ -26,7 +30,7 @@ offered like any other: the build reaches them as it reads the item's or the quo
 
 ## Reading the anchor
 
-The ``ParseContext`` has the anchor as a ``SourceNode``: its ``SourceNode/type``, its
+The ``ParseContext`` has the anchor as a ``SourceNode``: its ``SourceNode/kind``, its
 ``SourceNode/literal`` and the cmark fields of its kind, and its neighbours
 (``SourceNode/next``, ``SourceNode/parent``, ``SourceNode/firstChild``). A source node reads
 cmark's tree in place, so it is valid only during the call. To read the source, ask the context

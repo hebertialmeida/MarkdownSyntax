@@ -49,7 +49,7 @@ public final actor Markdown {
         }
     }
 
-    /// The syntax extensions, by anchor type.
+    /// The syntax extensions, by anchor kind.
     let syntax: SyntaxRegistry
 
     /// With syntax extensions, the tree and its HTML requests, built once.
@@ -74,7 +74,7 @@ public final actor Markdown {
 
     /// Init a parser that recognizes syntax extensions of your own.
     ///
-    /// Each extension is offered the nodes of its anchor types while the tree is built, and
+    /// Each extension is offered the nodes of its anchor kinds while the tree is built, and
     /// returns its own nodes for the syntax it recognizes (see ``MarkdownExtension``). With no
     /// syntax extensions, the parser is the one ``init(text:startingFootnoteIndex:options:extensions:)``
     /// makes.
@@ -88,7 +88,7 @@ public final actor Markdown {
     ///     - startingFootnoteIndex: The index footnote should start.
     ///     - options: The document options.
     ///     - extensions: gfm extensions to enable.
-    ///     - syntaxExtensions: Your syntax extensions. When two share an anchor type, the one
+    ///     - syntaxExtensions: Your syntax extensions. When two share an anchor kind, the one
     ///       given first is tried first.
     /// - Throws:
     ///     `CMDocumentError.parsingError` if an invalid event type is encountered.

@@ -94,7 +94,7 @@ struct Highlight: StaticPhrasingContent, ExtensionContent {
 
 /// Recognizes `==…==` inside a text node, and renders it as `<mark>…</mark>`.
 struct HighlightExtension: MarkdownExtension {
-    let anchors: [CMNodeType] = [.text]
+    let anchors: [NodeKind] = [.text]
 
     func recognizePhrasing(in context: inout ParseContext) -> [PhrasingContent]? {
         let source = context.source

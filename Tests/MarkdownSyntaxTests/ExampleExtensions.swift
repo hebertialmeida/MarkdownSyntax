@@ -33,7 +33,7 @@ struct Highlight: StaticPhrasingContent, ExtensionContent {
 
 /// Recognizes `==…==` inside a text node, and renders it as `<mark>…</mark>`.
 struct HighlightExtension: MarkdownExtension {
-    let anchors: [CMNodeType] = [.text]
+    let anchors: [NodeKind] = [.text]
 
     func recognizePhrasing(in context: inout ParseContext) -> [PhrasingContent]? {
         let source = context.source
@@ -102,7 +102,7 @@ struct Listing: BlockContent, ExtensionContent {
 /// Recognizes a `Listing:` paragraph followed by a code block, claims the code block, and renders
 /// both inside `<figure class="listing">`.
 struct ListingExtension: MarkdownExtension {
-    let anchors: [CMNodeType] = [.paragraph]
+    let anchors: [NodeKind] = [.paragraph]
 
     private static let marker = "Listing:"
 
@@ -111,7 +111,7 @@ struct ListingExtension: MarkdownExtension {
         guard
             let range = context.range(of: context.anchor),
             source[range].hasPrefix(Self.marker),
-            let next = context.nextUnclaimed, next.type == .codeBlock,
+            let next = context.nextUnclaimed, next.kind == .code,
             let codeRange = context.range(of: next),
             let paragraph = context.plainBlock(context.anchor) as? Paragraph,
             let code = context.plainBlock(next) as? Code,

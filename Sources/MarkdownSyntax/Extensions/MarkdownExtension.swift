@@ -6,9 +6,9 @@
 /// A syntax extension: syntax of your own, recognized while the tree is built.
 ///
 /// cmark parses the source as CommonMark and GitHub Flavored Markdown. An extension adds
-/// syntax on top of that grammar by reading what cmark made of the source: it names the node
-/// types it starts from, its ``anchors``, and the tree build offers it every node of those
-/// types, in the one walk that builds the tree. When it recognizes its syntax, it returns its
+/// syntax on top of that grammar by reading what cmark made of the source: it names the
+/// ``NodeKind``s it starts from, its ``anchors``, and the tree build offers it every node of
+/// those kinds, in the one walk that builds the tree. When it recognizes its syntax, it returns its
 /// own nodes in place of the anchor's; otherwise it returns `nil` and the anchor reads as
 /// cmark's node.
 ///
@@ -23,19 +23,19 @@
 /// ``ExtensionContent``, so a reader of the tree that doesn't know them can fall back to cmark's
 /// reading of the same source.
 ///
-/// When several extensions share an anchor type, they are tried in the order they were given to
+/// When several extensions share an anchor kind, they are tried in the order they were given to
 /// ``Markdown/init(text:startingFootnoteIndex:options:extensions:syntaxExtensions:)``, and the
-/// first that recognizes the node wins. A node whose type no extension names costs one lookup.
+/// first that recognizes the node wins. A node whose kind no extension names costs one lookup.
 ///
 /// See <doc:ExtendingTheSyntax>.
 public protocol MarkdownExtension: Sendable {
 
-    /// The cmark node types this extension starts from.
+    /// The kinds of node this extension starts from.
     ///
-    /// Only nodes of these types are offered to the recognizers. Name the narrowest type your
-    /// syntax can start in: `.blockQuote` for a syntax written on a quote, `.text` for one
+    /// Only nodes of these kinds are offered to the recognizers. Name the narrowest kind your
+    /// syntax can start in: `.blockquote` for a syntax written on a quote, `.text` for one
     /// written in running text. See <doc:Anchors>.
-    var anchors: [CMNodeType] { get }
+    var anchors: [NodeKind] { get }
 
     /// Recognizes the syntax at an anchor met as block content.
     ///
@@ -72,16 +72,15 @@ public extension MarkdownExtension {
 /// The registered extensions, indexed by the raw cmark type of their anchors.
 struct SyntaxRegistry: Sendable {
 
-    /// The extensions for each anchor type, in registration order.
+    /// The extensions for each anchor's raw cmark type, in registration order.
     private let table: [UInt32: [MarkdownExtension]]
 
     init(_ extensions: [MarkdownExtension]) {
         var table: [UInt32: [MarkdownExtension]] = [:]
         for syntax in extensions {
-            // A type named twice by one extension is offered to it once.
-            var seen = Set<UInt32>()
-            for anchor in syntax.anchors where seen.insert(anchor.rawValue).inserted {
-                table[anchor.rawValue, default: []].append(syntax)
+            // A kind named twice by one extension is offered to it once.
+            for anchor in Set(syntax.anchors) {
+                table[anchor.cmarkType.rawValue, default: []].append(syntax)
             }
         }
         self.table = table
