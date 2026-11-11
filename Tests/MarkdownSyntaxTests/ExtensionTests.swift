@@ -395,7 +395,7 @@ private final class HTMLCounter: @unchecked Sendable {
 /// markup as it is built.
 private struct CountingExtension: MarkdownExtension {
     let built: HTMLCounter
-    let anchors: [CMNodeType] = [.paragraph, .text]
+    var anchors: [CMNodeType] { [.paragraph, .text] }
 
     func recognizeBlock(in context: inout ParseContext) -> [BlockContent]? {
         guard let paragraph = context.plainBlock(context.anchor) else { return nil }
