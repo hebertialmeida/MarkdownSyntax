@@ -587,12 +587,14 @@ final class TreeBuilder {
     // MARK: Position
 
     func position(for node: CMNodeView) -> Position {
+        let position: Position
         switch node.type {
         case .link, .footnoteDefinition, .text:
-            return node.adjustedPosition(in: text, using: lineOffsets)
+            position = node.adjustedPosition(in: text, using: lineOffsets)
         default:
-            return node.position(in: text, using: lineOffsets)
+            position = node.position(in: text, using: lineOffsets)
         }
+        return positionInCell(position, of: node)
     }
 
     /// Position spanning a node's children — the label between a link's or image's brackets.

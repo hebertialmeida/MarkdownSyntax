@@ -8,7 +8,8 @@
 //  documentation and the tests; the library ships no syntax of its own.
 //
 //  The part between the README markers is the README's "Extending the syntax" example, word
-//  for word; `ReadmeExampleTests` checks that the two stay the same.
+//  for word, and the part between the README literal markers its `literal(of:)` example;
+//  `ReadmeExampleTests` checks that they stay the same.
 //
 
 // README example begin
@@ -80,6 +81,21 @@ struct HighlightExtension: MarkdownExtension {
     }
 }
 // README example end
+
+// README literal example begin
+/// The text between `[[` and `]]` in a text node, as a reader sees it: `[[Caf&eacute;]]` gives
+/// `Café`. The brackets are found in the source, so their ranges stay right where an escape or
+/// an entity was written.
+func bracketedText(in context: ParseContext) -> String? {
+    let source = context.source
+    guard
+        let range = context.range(of: context.anchor),
+        let open = source.range(of: "[[", range: range),
+        let close = source.range(of: "]]", range: open.upperBound..<range.upperBound)
+    else { return nil }
+    return context.literal(of: open.upperBound..<close.lowerBound)
+}
+// README literal example end
 
 /// A titled code listing: a paragraph that starts `Listing:`, then the code block right after it.
 struct Listing: BlockContent, ExtensionContent {

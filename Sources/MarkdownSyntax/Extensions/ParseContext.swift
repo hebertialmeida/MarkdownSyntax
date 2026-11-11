@@ -121,6 +121,21 @@ public struct ParseContext {
         builder.position(of: range)
     }
 
+    /// The text cmark makes of a source range when it reads it as text, as in
+    /// ``SourceNode/literal``: a backslash before ASCII punctuation gives that punctuation, and an
+    /// entity or numeric character reference gives the character it names.
+    ///
+    /// For syntax written inside text whose literal differs from its source: find the syntax in
+    /// the source, so its ranges are right, and take the text a reader sees from here. In
+    /// `see [[Caf&eacute;]]`, the source between the brackets reads as `Café`. In a GFM table
+    /// cell, as the anchor's is, `\|` reads as `|` first, as the table reads it. See <doc:Ranges>.
+    ///
+    /// Only escapes and references are read: emphasis, code spans, links and line ends in the
+    /// range stay as written. Pass a range of the anchor or of the siblings claimed.
+    public func literal(of range: Range<String.Index>) -> String {
+        builder.literal(of: range, inCell: builder.enclosingCell(of: anchor.view) != nil)
+    }
+
     // MARK: Siblings
 
     /// The siblings claimed so far, in order.

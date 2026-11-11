@@ -152,6 +152,25 @@ let html = try await markdown.renderHtml()
 // <p data-sourcepos="1:1-1:20">Some <mark>marked</mark> text</p>
 ```
 
+Syntax found in the source can hold an escape or an entity, which the reader doesn't see:
+`ParseContext.literal(of:)` reads a source range as cmark reads text, so the range comes from the
+source and the text from cmark's own rules — inside a GFM table cell, `\|` reads as `|`:
+
+```swift
+/// The text between `[[` and `]]` in a text node, as a reader sees it: `[[Caf&eacute;]]` gives
+/// `Café`. The brackets are found in the source, so their ranges stay right where an escape or
+/// an entity was written.
+func bracketedText(in context: ParseContext) -> String? {
+    let source = context.source
+    guard
+        let range = context.range(of: context.anchor),
+        let open = source.range(of: "[[", range: range),
+        let close = source.range(of: "]]", range: open.upperBound..<range.upperBound)
+    else { return nil }
+    return context.literal(of: open.upperBound..<close.lowerBound)
+}
+```
+
 A node of a type no extension names costs one lookup, and with no extension registered the tree is
 built exactly as before. The documentation catalog
 ([`MarkdownSyntax.docc`](Sources/MarkdownSyntax/MarkdownSyntax.docc)) has an article each on
