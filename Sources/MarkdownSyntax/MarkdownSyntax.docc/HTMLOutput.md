@@ -12,7 +12,10 @@ tree. An extension gives its HTML from its recognizer, through the ``ParseContex
 - `wrapHTML(_:in:onEnter:onExit:)` is for syntax written inside text: `syntax` is the whole of
   it, delimiters included, and `content` the part rendered between `onEnter` and `onExit`. The
   rest of `syntax` is left out, and the text around it renders as before. Call it once for each
-  occurrence in the text node, in source order.
+  occurrence in the text node, in source order. The text around and `content` are read as cmark
+  reads text (``ParseContext/literal(of:)``), so a text node with an escape or an entity, or `\|`
+  in a table cell, renders as without the extension: no escape or reference may span a bound of
+  `syntax` or `content`.
 
 ```swift
 context.wrapHTML(content, in: syntax, onEnter: "<mark>", onExit: "</mark>")
@@ -22,8 +25,7 @@ context.wrapHTML(content, in: syntax, onEnter: "<mark>", onExit: "</mark>")
 - ``ParseContext/omitHTML(_:)`` is for syntax written right after a node and belonging to it,
   such as an attribute block after an image: claim the siblings cmark read it into, then leave
   it out. The anchor renders as cmark renders it; the siblings the syntax covers don't render,
-  and the text the last of them holds after it renders as text. It makes no custom node, so it
-  works in a table cell too.
+  and the text the last of them holds after it renders as text. It makes no custom node.
 
 ```swift
 context.claim(through: lastSiblingOfTheBlock)
@@ -52,8 +54,17 @@ runs.
 
 ## Where a custom node can't go
 
-A custom node goes where its parent can contain one. A GFM table cell can't: there, both
-`wrapHTML` calls return `false` (``ParseContext/omitHTML(_:)`` makes none, and still works), nothing is asked for, and the cell renders as cmark renders it.
+A custom node goes where its parent can contain one. Any inline parent can take a custom inline
+node: a GFM table cell, which can't contain one, holds it inside a node it can contain and which
+cmark's HTML renders as nothing of its own, so the cell's HTML is the same as anywhere else:
+
+```swift
+context.wrapHTML(content, in: syntax, onEnter: "<mark>", onExit: "</mark>")
+// | ==b\|c== |  →  <td><mark>b|c</mark></td>
+```
+
+A block parent that takes only some blocks, such as a list (items only), can't: there, both
+`wrapHTML` calls return `false`, nothing is asked for, and the node renders as cmark renders it.
 The tree still has your nodes.
 
 cmark renders a wrapped node as though the custom node were its parent. A paragraph in a tight

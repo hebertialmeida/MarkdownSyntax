@@ -105,12 +105,13 @@ final class AttachedSyntaxTests: XCTestCase {
         ("multibyte", "Ünïcödé ![Föx](fox.png){alt=\"ç\"} 日本\n", "Ünïcödé ![Föx](fox.png) 日本\n"),
     ]
 
-    func testSplitTakesOnlyABlockOfPlainTextOutsideATableCell() async throws {
-        // The spike (0060, M5): a text-anchored split can't leave the block out where an entity,
-        // an escape or emphasis is inside it, or in a table cell.
+    func testSplitTakesABlockInOneTextNode() async throws {
+        // The spike (0060, M5): a text-anchored split can't leave the block out where emphasis, a
+        // link or a line break splits it into several nodes. An entity, an escape (1.7.0) or a
+        // table cell (1.7.0) leaves it one text node, which it takes.
         let expected: [String: Bool] = [
-            "plain": true, "alone": true, "entity": false, "escape": false, "emphasis": false, "link": false,
-            "line break": false, "table cell": false, "link label": true, "quote": false, "multibyte": true,
+            "plain": true, "alone": true, "entity": true, "escape": true, "emphasis": false, "link": false,
+            "line break": false, "table cell": true, "link label": true, "quote": false, "multibyte": true,
         ]
         for item in cases {
             let probe = SplitProbe()

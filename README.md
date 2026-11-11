@@ -171,6 +171,10 @@ func bracketedText(in context: ParseContext) -> String? {
 }
 ```
 
+`wrapHTML(_:in:onEnter:onExit:)` reads its text the same way, so syntax in a text node with an
+escape or an entity, or in a table cell, renders with its markup and the text around as cmark
+renders it: `| ==b\|c== |` gives `<td><mark>b|c</mark></td>`.
+
 A node of a type no extension names costs one lookup, and with no extension registered the tree is
 built exactly as before. The documentation catalog
 ([`MarkdownSyntax.docc`](Sources/MarkdownSyntax/MarkdownSyntax.docc)) has an article each on

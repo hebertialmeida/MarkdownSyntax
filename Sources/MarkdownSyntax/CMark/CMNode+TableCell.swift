@@ -90,6 +90,11 @@ extension TreeBuilder {
     /// and `handle_entity`, inlines.c). In a table cell, `\|` is read as `|` first, as the table
     /// does before parsing the cell.
     func literal(of range: Range<String.Index>, inCell: Bool) -> String {
+        Self.literal(of: range, in: text, inCell: inCell)
+    }
+
+    /// ``literal(of:inCell:)`` of a range of `text`, for a render, which holds no builder.
+    static func literal(of range: Range<String.Index>, in text: String, inCell: Bool) -> String {
         var bytes = Array(text.utf8[range])
         if inCell {
             var unescaped: [UInt8] = []

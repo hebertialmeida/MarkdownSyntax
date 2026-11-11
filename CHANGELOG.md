@@ -11,3 +11,8 @@ Additive; no source change for code built against 1.6.0.
 - Nodes inside a GFM table cell that holds `\|` are placed where they are written. The table reads
   `\|` as `|` before it parses the cell, and every escaped pipe before a node moved its range one
   byte early, so a text holding one ended a byte short.
+- `wrapHTML(_:in:onEnter:onExit:)` takes a text node with an escape or an entity, and reads the
+  text around and `content` as cmark reads text (`literal(of:)`); it returns `false` when an escape
+  or a reference spans a bound. It used to refuse such a node.
+- Both `wrapHTML` calls work in a GFM table cell: the custom inline node goes inside a node the cell
+  can contain and cmark's HTML renders as nothing of its own. They used to return `false` there.

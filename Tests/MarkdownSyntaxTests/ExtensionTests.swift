@@ -226,15 +226,61 @@ final class ExtensionTests: XCTestCase {
         XCTAssertEqual(commonMark, plainCommonMark)
     }
 
-    func testHTMLIsLeftToCmarkWhereACustomNodeCantGo() async throws {
-        // A GFM table cell can't hold a custom inline node: the tree has the extension's node,
-        // the HTML is cmark's own.
+    func testATableCellHoldsTheExtensionMarkup() async throws {
+        // A GFM table cell can't contain a custom inline node: it holds one that cmark renders as
+        // nothing of its own, and the cell's HTML has the markup as a paragraph's would.
         let source = "| a |\n|---|\n| ==b== |\n"
-        let markdown = try await Markdown(text: source, syntaxExtensions: [HighlightExtension()])
+        let markdown = try await Markdown(text: source, options: [], syntaxExtensions: [HighlightExtension()])
         let tree = await markdown.parse()
-        let (html, expected) = (try await markdown.renderHtml(), try await Markdown(text: source).renderHtml())
+        let html = try await markdown.renderHtml()
         XCTAssertEqual(collect(Highlight.self, in: tree).count, 1)
-        XCTAssertEqual(html, expected)
+        XCTAssertEqual(html, Self.table(cell: "<mark>b</mark>"))
+        let (xml, plainXml) = (try await markdown.renderXml(), try await Markdown(text: source, options: []).renderXml())
+        XCTAssertEqual(xml, plainXml, "the tree is cmark's own after the render")
+        let again = try await markdown.renderHtml()
+        XCTAssertEqual(again, html, "a second render is the same")
+    }
+
+    func testWrappedTextBesideAnEscapeOrAnEntityRendersAsCmarkReadsIt() async throws {
+        let cases: [(name: String, source: String, html: String)] = [
+            ("escape before", "a \\* ==b== c\n", "<p>a * <mark>b</mark> c</p>\n"),
+            ("entity inside", "==b &amp; c== d &lt;\n", "<p><mark>b &amp; c</mark> d &lt;</p>\n"),
+            ("numeric after", "==b== &#35; \\[x\\]\n", "<p><mark>b</mark> # [x]</p>\n"),
+        ]
+        for item in cases {
+            let probe = MarkProbe()
+            let html = try await Markdown(text: item.source, options: [], syntaxExtensions: [probe]).renderHtml()
+            XCTAssertEqual(probe.results, [true], item.name)
+            XCTAssertEqual(html, item.html, item.name)
+        }
+    }
+
+    func testAnEscapedPipeInACellReadsAsAPipeInTheMarkup() async throws {
+        let html = try await Markdown(text: "| a |\n|---|\n| x ==b\\|c== \\| y |\n", options: [], syntaxExtensions: [MarkProbe()]).renderHtml()
+        XCTAssertEqual(html, Self.table(cell: "x <mark>b|c</mark> | y"))
+    }
+
+    func testABoundInsideAnEscapeOrAReferenceAsksForNothing() async throws {
+        // Syntax opening between a backslash and the `=` it escapes, or inside `&amp;`: the text
+        // can't be read in parts, so nothing is asked for and the HTML is cmark's own.
+        for (source, cutInto) in [("a \\==b== c\n", 0), ("a &amp; ==b== c\n", 3)] {
+            let probe = MarkProbe(cutInto: cutInto)
+            let markdown = try await Markdown(text: source, options: [], syntaxExtensions: [probe])
+            let html = try await markdown.renderHtml()
+            XCTAssertEqual(probe.results, [false], source)
+            let plain = try await Markdown(text: source, options: []).renderHtml()
+            XCTAssertEqual(html, plain, source)
+        }
+    }
+
+    func testAPhrasingAnchorWrappedWholeInACellHasItsMarkup() async throws {
+        let html = try await Markdown(text: "| a |\n|---|\n| *LOUD* b |\n", options: [], syntaxExtensions: [WrapLoudExtension()]).renderHtml()
+        XCTAssertEqual(html, Self.table(cell: "<em><span class=\"loud\">LOUD</span></em> b"))
+    }
+
+    /// cmark's HTML of a one-column table headed `a`, its one cell holding `cell`.
+    private static func table(cell: String) -> String {
+        "<table>\n<thead>\n<tr>\n<th>a</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>\(cell)</td>\n</tr>\n</tbody>\n</table>\n"
     }
 
     func testAWrappedParagraphInATightListRendersAsThoughTheCustomNodeWereItsParent() async throws {
@@ -455,5 +501,52 @@ private struct DivExtension: MarkdownExtension {
         guard let paragraph = context.plainBlock(context.anchor) else { return nil }
         context.wrapHTML(onEnter: "<div>", onExit: "</div>")
         return [paragraph]
+    }
+}
+
+/// Asks for a `<mark>` around each `==…==` in a text node's source, its ranges from the source
+/// and the text left to the render, and records what each call returned. With `cutInto`, the
+/// syntax it asks for starts that many bytes before the `==`.
+private final class MarkProbe: MarkdownExtension, @unchecked Sendable {
+    let anchors: [NodeKind] = [.text]
+    let cutInto: Int
+    private let lock = NSLock()
+    private var asked: [Bool] = []
+    var results: [Bool] { lock.withLock { asked } }
+
+    init(cutInto: Int = 0) {
+        self.cutInto = cutInto
+    }
+
+    func recognizePhrasing(in context: inout ParseContext) -> [PhrasingContent]? {
+        let source = context.source
+        guard let range = context.range(of: context.anchor), let text = context.plainPhrasing(context.anchor) else { return nil }
+        var rest = range.lowerBound
+        var any = false
+        while
+            let open = source.range(of: "==", range: rest..<range.upperBound),
+            let close = source.range(of: "==", range: open.upperBound..<range.upperBound)
+        {
+            let start = source.utf8.index(open.lowerBound, offsetBy: -cutInto)
+            let took = context.wrapHTML(open.upperBound..<close.lowerBound, in: start..<close.upperBound, onEnter: "<mark>", onExit: "</mark>")
+            lock.withLock { asked.append(took) }
+            any = true
+            rest = close.upperBound
+        }
+        return any ? [text] : nil
+    }
+}
+
+/// Wraps an all-caps text node whole in a `<span class="loud">`.
+private struct WrapLoudExtension: MarkdownExtension {
+    let anchors: [NodeKind] = [.text]
+
+    func recognizePhrasing(in context: inout ParseContext) -> [PhrasingContent]? {
+        guard
+            let literal = context.anchor.literal, literal == "LOUD",
+            let text = context.plainPhrasing(context.anchor)
+        else { return nil }
+        context.wrapHTML(onEnter: "<span class=\"loud\">", onExit: "</span>")
+        return [text]
     }
 }
