@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.7.0 — unreleased
+## 1.7.0 — 2026-11-12
 
 Additive; no source change for code built against 1.6.0.
 
