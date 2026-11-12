@@ -18,16 +18,28 @@ final class ReadmeExampleTests: XCTestCase {
 
     func testReadmeAndCatalogExamplesAreTheTestedCode() throws {
         let tested = try String(contentsOf: Self.root.appendingPathComponent("Tests/MarkdownSyntaxTests/ExampleExtensions.swift"), encoding: .utf8)
-        let example = try XCTUnwrap(
-            tested.components(separatedBy: "// README example begin\n").dropFirst().first?
-                .components(separatedBy: "// README example end").first
-        )
-
-        for file in ["README.md", "Sources/MarkdownSyntax/MarkdownSyntax.docc/ExtendingTheSyntax.md"] {
-            let text = try String(contentsOf: Self.root.appendingPathComponent(file), encoding: .utf8)
-            let blocks = text.components(separatedBy: "```swift\n").dropFirst().compactMap { $0.components(separatedBy: "\n```").first }
-            XCTAssertTrue(blocks.contains(example.trimmingCharacters(in: .newlines)), "\(file) has the example in ExampleExtensions.swift, word for word")
+        let examples: [(marker: String, files: [String])] = [
+            ("README example", ["README.md", "Sources/MarkdownSyntax/MarkdownSyntax.docc/ExtendingTheSyntax.md"]),
+            ("README literal example", ["README.md", "Sources/MarkdownSyntax/MarkdownSyntax.docc/Ranges.md"]),
+        ]
+        for (marker, files) in examples {
+            let example = try XCTUnwrap(
+                tested.components(separatedBy: "// \(marker) begin\n").dropFirst().first?
+                    .components(separatedBy: "// \(marker) end").first
+            )
+            for file in files {
+                let text = try String(contentsOf: Self.root.appendingPathComponent(file), encoding: .utf8)
+                let blocks = text.components(separatedBy: "```swift\n").dropFirst().compactMap { $0.components(separatedBy: "\n```").first }
+                XCTAssertTrue(blocks.contains(example.trimmingCharacters(in: .newlines)), "\(file) has the \(marker) in ExampleExtensions.swift, word for word")
+            }
         }
+    }
+
+    func testReadmeLiteralExampleReadsEscapesAndEntities() async throws {
+        let reader = BracketedTextReader()
+        let markdown = try await Markdown(text: "See [[Caf&eacute; \\#2]] and the rest.", syntaxExtensions: [reader])
+        _ = await markdown.parse()
+        XCTAssertEqual(reader.found, ["Café #2"])
     }
 
     func testReadmeExampleProducesTheDocumentedTreeAndHTML() async throws {
@@ -45,5 +57,16 @@ final class ReadmeExampleTests: XCTestCase {
         XCTAssertEqual((paragraph.children[2] as? Text)?.value, " text")
 
         XCTAssertEqual(html, "<p data-sourcepos=\"1:1-1:20\">Some <mark>marked</mark> text</p>\n")
+    }
+}
+
+/// Reads the README literal example's `bracketedText(in:)` for every text node.
+private final class BracketedTextReader: MarkdownExtension, @unchecked Sendable {
+    let anchors: [NodeKind] = [.text]
+    private(set) var found: [String] = []
+
+    func recognizePhrasing(in context: inout ParseContext) -> [PhrasingContent]? {
+        if let text = bracketedText(in: context) { found.append(text) }
+        return nil
     }
 }

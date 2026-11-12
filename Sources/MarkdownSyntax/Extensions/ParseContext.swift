@@ -83,7 +83,7 @@ public struct ParseContext {
     /// and what it asked for. Committed only if the recognizer returns nodes.
     private var htmlNodes: [CMNodeView]?
     private var htmlWrap: (onEnter: () -> String, onExit: () -> String)?
-    private var htmlSplit: (run: Range<String.Index>, end: String.Index, pieces: [ExtensionHTML.Piece])?
+    private var htmlSplit: (run: Range<String.Index>, end: String.Index, pieces: [ExtensionHTML.Piece], inCell: Bool)?
     /// For ``omitHTML(_:)``: the text the last sibling claimed keeps after the syntax, if any.
     private var htmlOmit: String??
 
@@ -119,6 +119,21 @@ public struct ParseContext {
     /// source.
     public func position(of range: Range<String.Index>) -> Position? {
         builder.position(of: range)
+    }
+
+    /// The text cmark makes of a source range when it reads it as text, as in
+    /// ``SourceNode/literal``: a backslash before ASCII punctuation gives that punctuation, and an
+    /// entity or numeric character reference gives the character it names.
+    ///
+    /// For syntax written inside text whose literal differs from its source: find the syntax in
+    /// the source, so its ranges are right, and take the text a reader sees from here. In
+    /// `see [[Caf&eacute;]]`, the source between the brackets reads as `Café`. In a GFM table
+    /// cell, as the anchor's is, `\|` reads as `|` first, as the table reads it. See <doc:Ranges>.
+    ///
+    /// Only escapes and references are read: emphasis, code spans, links and line ends in the
+    /// range stay as written. Pass a range of the anchor or of the siblings claimed.
+    public func literal(of range: Range<String.Index>) -> String {
+        builder.literal(of: range, inCell: builder.enclosingCell(of: anchor.view) != nil)
     }
 
     // MARK: Siblings
@@ -236,7 +251,8 @@ public struct ParseContext {
     /// never renders HTML never builds them.
     ///
     /// - Returns: `false`, and nothing is asked for, when HTML was already asked for in this call
-    ///   or the anchor's parent can't contain a custom node (a GFM table cell can't).
+    ///   or the anchor's parent can't contain a custom node (a list holds only items). Any inline
+    ///   parent can, a GFM table cell included.
     @discardableResult
     public mutating func wrapHTML(onEnter: @autoclosure @escaping () -> String, onExit: @autoclosure @escaping () -> String) -> Bool {
         let nodes = [anchor.view] + claimed.map(\.view)
@@ -257,11 +273,16 @@ public struct ParseContext {
     /// `onEnter` and `onExit` are evaluated only when the document is rendered, so a parse that
     /// never renders HTML never builds them.
     ///
+    /// The text around and `content` render as cmark reads them (``literal(of:)``), so escapes
+    /// and entity references in them, and `\|` in a GFM table cell, read as they do without the
+    /// extension.
+    ///
     /// - Returns: `false`, and nothing is asked for, unless the anchor was met as phrasing
     ///   content; the anchor and the siblings claimed so far are adjacent text nodes whose
-    ///   literal is their source (no entity or escape inside); `syntax` lies in their source
-    ///   after any occurrence given before and `content` lies in `syntax`; no
-    ///   ``wrapHTML(onEnter:onExit:)`` was asked for; and their parent can contain a custom node.
+    ///   literal is their source read as text (``literal(of:)``); `syntax` lies in their source
+    ///   after any occurrence given before and `content` lies in `syntax`, and no escape or
+    ///   reference spans a bound of either; no ``wrapHTML(onEnter:onExit:)`` was asked for; and
+    ///   their parent can contain a custom node, as any inline parent can.
     @discardableResult
     public mutating func wrapHTML(
         _ content: Range<String.Index>,
@@ -272,14 +293,20 @@ public struct ParseContext {
         guard !isBlock, htmlWrap == nil, htmlOmit == nil else { return false }
         if htmlSplit == nil {
             let nodes = [anchor.view] + claimed.map(\.view)
-            guard let run = builder.literalTextRun(nodes), builder.canWrap(nodes[0], inBlock: false) else { return false }
+            let inCell = builder.enclosingCell(of: nodes[0]) != nil
+            guard
+                let run = builder.literalTextRun(nodes, inCell: inCell),
+                builder.canWrap(nodes[0], inBlock: false)
+            else { return false }
             htmlNodes = nodes
-            htmlSplit = (run, run.lowerBound, [])
+            htmlSplit = (run, run.lowerBound, [], inCell)
         }
         guard
             var split = htmlSplit,
             split.end <= syntax.lowerBound, syntax.upperBound <= split.run.upperBound,
-            syntax.lowerBound <= content.lowerBound, content.upperBound <= syntax.upperBound
+            syntax.lowerBound <= content.lowerBound, content.upperBound <= syntax.upperBound,
+            [syntax.lowerBound, content.lowerBound, content.upperBound, syntax.upperBound]
+                .allSatisfy({ builder.cutsCleanly(split.run, at: $0, inCell: split.inCell) })
         else { return false }
 
         if split.end < syntax.lowerBound {
@@ -299,8 +326,7 @@ public struct ParseContext {
     /// for this. `syntax` opens where the first sibling claimed does. The siblings it covers
     /// whole don't render; a text sibling it ends inside renders only its text after it, as
     /// cmark renders text. Whatever cmark read inside the syntax — emphasis, a link, an entity
-    /// or an escape — goes with it, and no custom node is made, so it works where none can go,
-    /// such as a GFM table cell. See <doc:HTMLOutput>.
+    /// or an escape — goes with it, and no custom node is made. See <doc:HTMLOutput>.
     ///
     /// - Returns: `false`, and nothing is asked for, unless the anchor was met as phrasing
     ///   content; siblings were claimed; `syntax` is not empty, opens where the first of them
@@ -351,6 +377,6 @@ public struct ParseContext {
         if split.end < split.run.upperBound {
             split.pieces.append(.text(split.end..<split.run.upperBound))
         }
-        return ExtensionHTML.Request(nodes: nodes, isBlock: false, kind: .split(split.pieces))
+        return ExtensionHTML.Request(nodes: nodes, isBlock: false, kind: .split(split.pieces, inCell: split.inCell))
     }
 }

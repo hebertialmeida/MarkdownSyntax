@@ -558,21 +558,26 @@ final class TreeBuilder {
         htmlRequests.append(request)
     }
 
-    /// Whether a custom node can take this node's place in its parent.
+    /// Whether a custom node can take this node's place in its parent: directly, or for an inline
+    /// node in a parent that takes no custom inline node (a GFM table cell), inside a node cmark
+    /// renders as nothing of its own (see ``ExtensionHTML``).
     func canWrap(_ node: CMNodeView, inBlock isBlock: Bool) -> Bool {
         guard let parent = node.parent else { return false }
-        return cmark_node_can_contain_type(parent.pointer, isBlock ? CMARK_NODE_CUSTOM_BLOCK : CMARK_NODE_CUSTOM_INLINE)
+        if isBlock { return cmark_node_can_contain_type(parent.pointer, CMARK_NODE_CUSTOM_BLOCK) }
+        return cmark_node_can_contain_type(parent.pointer, CMARK_NODE_CUSTOM_INLINE)
+            || cmark_node_can_contain_type(parent.pointer, ExtensionHTML.inlineHolder)
     }
 
-    /// The source a run of adjacent text nodes covers, when each one's literal is its source.
-    func literalTextRun(_ nodes: [CMNodeView]) -> Range<String.Index>? {
+    /// The source a run of adjacent text nodes covers, when each one's literal is its source read
+    /// as text (``literal(of:inCell:)``): its escapes and references the only difference.
+    func literalTextRun(_ nodes: [CMNodeView], inCell: Bool) -> Range<String.Index>? {
         var run: Range<String.Index>?
         for node in nodes {
             guard
                 node.type == .text,
                 let range = range(of: node),
                 let literal = node.literal,
-                literal[...] == text[range]
+                literal[...] == text[range] || literal == self.literal(of: range, inCell: inCell)
             else { return nil }
             if let current = run {
                 guard current.upperBound == range.lowerBound else { return nil }
@@ -584,15 +589,32 @@ final class TreeBuilder {
         return run
     }
 
+    /// Whether the text of `run` reads the same cut at `index` and read in two parts: no escape
+    /// or reference spans it. Read in a window around it, longer than any reference.
+    func cutsCleanly(_ run: Range<String.Index>, at index: String.Index, inCell: Bool) -> Bool {
+        let utf8 = text.utf8
+        let lower = utf8.index(index, offsetBy: -Self.cutWindow, limitedBy: run.lowerBound) ?? run.lowerBound
+        let upper = utf8.index(index, offsetBy: Self.cutWindow, limitedBy: run.upperBound) ?? run.upperBound
+        let window = text[lower..<upper]
+        guard window.utf8.contains(where: { $0 == 0x5C || $0 == 0x26 }) else { return true }
+        return literal(of: lower..<index, inCell: inCell) + literal(of: index..<upper, inCell: inCell)
+            == literal(of: lower..<upper, inCell: inCell)
+    }
+
+    /// Bytes read on each side of a cut: more than the longest entity reference, 33.
+    private static let cutWindow = 40
+
     // MARK: Position
 
     func position(for node: CMNodeView) -> Position {
+        let position: Position
         switch node.type {
         case .link, .footnoteDefinition, .text:
-            return node.adjustedPosition(in: text, using: lineOffsets)
+            position = node.adjustedPosition(in: text, using: lineOffsets)
         default:
-            return node.position(in: text, using: lineOffsets)
+            position = node.position(in: text, using: lineOffsets)
         }
+        return positionInCell(position, of: node)
     }
 
     /// Position spanning a node's children — the label between a link's or image's brackets.
